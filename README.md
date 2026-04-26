@@ -124,8 +124,8 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/dharma-nyaya.git
-cd dharma-nyaya
+git clone https://github.com/sid321axn/dharma_nyaya_legal_ai.git
+cd dharma_nyaya_legal_ai
 ```
 
 ### 2. Create a Virtual Environment & Install Dependencies
