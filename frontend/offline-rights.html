@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHARMA-NYAYA — Your Rights (Offline)</title>
+    <meta name="description" content="Your legal rights — available offline, always.">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <style>
+        :root {
+            --indigo: #4f46e5;
+            --purple: #7c3aed;
+            --red: #dc2626;
+            --green: #16a34a;
+            --amber: #d97706;
+            --blue: #1d4ed8;
+            --gray: #6b7280;
+            --bg: #f8f9ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        .banner {
+            background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+        .banner h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: .25rem; }
+        .banner p { font-size: .85rem; opacity: .85; }
+        .offline-badge {
+            display: inline-block;
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.4);
+            color: white;
+            font-size: .75rem;
+            font-weight: 600;
+            padding: .2rem .7rem;
+            border-radius: 999px;
+            margin-top: .5rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+        /* Language Tabs */
+        .lang-tabs {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .lang-btn {
+            padding: .4rem .9rem;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: .75rem;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+            color: var(--gray);
+        }
+        .lang-btn.active {
+            border-color: var(--indigo);
+            background: var(--indigo);
+            color: white;
+        }
+
+        /* Section */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 1.5rem 0 .75rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .section-title .icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: .5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Rights grid */
+        .rights-grid { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+        @media(min-width: 600px) { .rights-grid { grid-template-columns: 1fr 1fr; } }
+
+        .right-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            border-left: 4px solid;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .right-card h4 { font-size: .85rem; font-weight: 700; margin-bottom: .3rem; }
+        .right-card p { font-size: .8rem; color: #4b5563; }
+        .right-card .law-tag {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: .7rem;
+            font-weight: 600;
+            padding: .15rem .5rem;
+            border-radius: .4rem;
+            margin-top: .4rem;
+        }
+
+        /* Emergency numbers */
+        .emergency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+        @media(min-width: 600px) { .emergency-grid { grid-template-columns: repeat(4,1fr); } }
+        .emergency-card {
+            background: white;
+            border-radius: 1rem;
+            padding: .9rem .75rem;
+            text-align: center;
+            border: 2px solid #fee2e2;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .emergency-card .num {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--red);
+        }
+        .emergency-card .label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
+
+        /* Checklist */
+        .checklist { list-style: none; display: grid; gap: .5rem; }
+        .checklist li {
+            background: white;
+            border-radius: .75rem;
+            padding: .75rem 1rem;
+            font-size: .82rem;
+            display: flex;
+            align-items: flex-start;
+            gap: .6rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        }
+        .checklist li::before {
+            content: '→';
+            color: var(--indigo);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: .05rem;
+        }
+
+        /* Footer note */
+        .offline-note {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-size: .8rem;
+            color: #92400e;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Print button */
+        .print-btn {
+            display: block;
+            width: 100%;
+            padding: .85rem;
+            background: var(--indigo);
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: .9rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        @media print {
+            .print-btn, .lang-tabs, .banner .offline-badge { display: none; }
+            .right-card { break-inside: avoid; }
+        }
+
+        /* Lang content hidden by default */
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>⚖️ DHARMA-NYAYA</h1>
+        <p>Your Legal Rights — Available Offline</p>
+        <span class="offline-badge">📵 Offline Mode • Always Available</span>
+    </div>
+
+    <div class="container">
+        <!-- Language selector -->
+        <div class="lang-tabs" role="tablist" aria-label="Select Language">
+            <button class="lang-btn active" onclick="setLang('en')" role="tab" aria-selected="true">English</button>
+            <button class="lang-btn" onclick="setLang('hi')" role="tab">हिन्दी</button>
+            <button class="lang-btn" onclick="setLang('bn')" role="tab">বাংলা</button>
+            <button class="lang-btn" onclick="setLang('ta')" role="tab">தமிழ்</button>
+            <button class="lang-btn" onclick="setLang('te')" role="tab">తెలుగు</button>
+            <button class="lang-btn" onclick="setLang('kn')" role="tab">ಕನ್ನಡ</button>
+        </div>
+
+        <!-- ══ ENGLISH ══ -->
+        <div class="lang-content active" id="lang-en">
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">🚨</span>
+                Emergency Numbers
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">Police / Emergency</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">Women Helpline</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">Child Helpline</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">Legal Aid Services</div></div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">⚖️</span>
+                Fundamental Rights (Articles 12–35)
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>Right to Equality</h4>
+                    <p>Every citizen is equal before the law. No discrimination based on religion, race, caste, sex, or place of birth.</p>
+                    <span class="law-tag">Articles 14–18</span>
+                </div>
+                <div class="right-card" style="border-color:#7c3aed">
+                    <h4>Right to Freedom</h4>
+                    <p>Freedom of speech, assembly, movement, profession. No arbitrary arrest. Right to life and personal liberty.</p>
+                    <span class="law-tag">Articles 19–22</span>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>Right Against Exploitation</h4>
+                    <p>Prohibition of forced labour, trafficking, and child labour in factories or hazardous work.</p>
+                    <span class="law-tag">Articles 23–24</span>
+                </div>
+                <div class="right-card" style="border-color:#d97706">
+                    <h4>Right to Freedom of Religion</h4>
+                    <p>Freedom to profess, practice, and propagate religion. Freedom of conscience.</p>
+                    <span class="law-tag">Articles 25–28</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>Right to Constitutional Remedies</h4>
+                    <p>Right to approach Supreme Court or High Court if fundamental rights are violated. File a Writ Petition.</p>
+                    <span class="law-tag">Article 32 &amp; 226</span>
+                </div>
+                <div class="right-card" style="border-color:#0284c7">
+                    <h4>Right to Education</h4>
+                    <p>Free and compulsory education for all children aged 6–14 years.</p>
+                    <span class="law-tag">Article 21A • RTE Act 2009</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#dcfce7">🏠</span>
+                Tenant Rights
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>Security Deposit Refund</h4>
+                    <p>Landlord must refund deposit within 30 days of vacating (varies by state). Cannot forfeit without proving damage.</p>
+                    <span class="law-tag">Rent Control Acts</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>Notice Period</h4>
+                    <p>Minimum 15–30 days notice before eviction. Landlord cannot forcibly evict without a court order.</p>
+                    <span class="law-tag">Transfer of Property Act</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>Habitability</h4>
+                    <p>You have the right to a habitable home. Landlord must repair structural defects, plumbing, and electricity.</p>
+                    <span class="law-tag">State Rent Acts</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>Receipt for Rent</h4>
+                    <p>Always get a rent receipt. Landlord is legally obligated to provide one. Keep digital copies.</p>
+                    <span class="law-tag">Indian Contract Act</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#dbeafe">👔</span>
+                Employee / Labour Rights
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#1d4ed8">
+                    <h4>Minimum Wage</h4>
+                    <p>Every worker is entitled to minimum wage. Check State Government notification for your category.</p>
+                    <span class="law-tag">Minimum Wages Act 1948</span>
+                </div>
+                <div class="right-card" style="border-color:#1d4ed8">
+                    <h4>No Arbitrary Termination</h4>
+                    <p>Employers with 100+ workers must get government permission before retrenchment. Notice/severance pay required.</p>
+                    <span class="law-tag">Industrial Disputes Act 1947</span>
+                </div>
+                <div class="right-card" style="border-color:#1d4ed8">
+                    <h4>POSH — Workplace Safety</h4>
+                    <p>Every woman has the right to a safe workplace, free from sexual harassment. Employers must have an ICC committee.</p>
+                    <span class="law-tag">POSH Act 2013</span>
+                </div>
+                <div class="right-card" style="border-color:#1d4ed8">
+                    <h4>Provident Fund (PF)</h4>
+                    <p>Employees earning up to ₹15,000/month are entitled to PF. Employer must contribute. You can claim it on exit.</p>
+                    <span class="law-tag">EPF Act 1952</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#fef3c7">🛒</span>
+                Consumer Rights
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#d97706">
+                    <h4>Right to Redressal</h4>
+                    <p>File complaint at District Consumer Forum within 2 years of deficiency. No court fee for claims under ₹5 lakhs.</p>
+                    <span class="law-tag">Consumer Protection Act 2019</span>
+                </div>
+                <div class="right-card" style="border-color:#d97706">
+                    <h4>Right to Information</h4>
+                    <p>You must be told the price, quality, and ingredients of goods/services. Misleading ads are illegal.</p>
+                    <span class="law-tag">Consumer Protection Act 2019</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#fce7f3">🚔</span>
+                Rights if Arrested
+            </div>
+            <ul class="checklist">
+                <li>Right to know the reason for arrest (Article 22)</li>
+                <li>Right to remain silent — you cannot be forced to confess</li>
+                <li>Right to inform a family member or friend about arrest</li>
+                <li>Right to a lawyer — free legal aid if you cannot afford one (Section 304 CrPC)</li>
+                <li>Must be produced before a magistrate within 24 hours</li>
+                <li>No torture or third-degree treatment — complain to NHRC or State HR Commission</li>
+                <li>Women cannot be arrested after sunset or before sunrise (except in exceptional cases)</li>
+            </ul>
+
+            <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        </div>
+
+        <!-- ══ HINDI ══ -->
+        <div class="lang-content" id="lang-hi">
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">🚨</span>
+                आपातकालीन नंबर
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">पुलिस / आपातकाल</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">महिला हेल्पलाइन</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">बाल हेल्पलाइन</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">विधिक सहायता</div></div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">⚖️</span>
+                मूल अधिकार (अनुच्छेद 12–35)
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>समानता का अधिकार</h4>
+                    <p>हर नागरिक कानून के सामने बराबर है। जाति, धर्म, लिंग के आधार पर भेदभाव नहीं होगा।</p>
+                    <span class="law-tag">अनुच्छेद 14–18</span>
+                </div>
+                <div class="right-card" style="border-color:#7c3aed">
+                    <h4>स्वतंत्रता का अधिकार</h4>
+                    <p>बोलने, घूमने, काम चुनने की आज़ादी। बिना कारण गिरफ्तारी नहीं होगी। जीवन और व्यक्तिगत स्वतंत्रता का अधिकार।</p>
+                    <span class="law-tag">अनुच्छेद 19–22</span>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>शोषण के विरुद्ध अधिकार</h4>
+                    <p>जबरन मजदूरी, मानव तस्करी, और बाल श्रम पर रोक।</p>
+                    <span class="law-tag">अनुच्छेद 23–24</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>संवैधानिक उपचारों का अधिकार</h4>
+                    <p>मूल अधिकार उल्लंघन होने पर सुप्रीम कोर्ट या हाई कोर्ट जाने का अधिकार। रिट याचिका दाखिल करें।</p>
+                    <span class="law-tag">अनुच्छेद 32 और 226</span>
+                </div>
+                <div class="right-card" style="border-color:#0284c7">
+                    <h4>शिक्षा का अधिकार</h4>
+                    <p>6–14 वर्ष के बच्चों को मुफ्त और अनिवार्य शिक्षा।</p>
+                    <span class="law-tag">अनुच्छेद 21A • RTE अधिनियम 2009</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span class="icon" style="background:#fce7f3">🚔</span>
+                गिरफ्तारी पर आपके अधिकार
+            </div>
+            <ul class="checklist">
+                <li>गिरफ्तारी का कारण जानने का अधिकार (अनुच्छेद 22)</li>
+                <li>चुप रहने का अधिकार — आपको जबरन बयान नहीं देना होगा</li>
+                <li>परिवार के किसी सदस्य को सूचित करने का अधिकार</li>
+                <li>वकील पाने का अधिकार — मुफ्त कानूनी सहायता (धारा 304 दंड प्रक्रिया संहिता)</li>
+                <li>24 घंटे के अंदर मजिस्ट्रेट के सामने पेश करना अनिवार्य</li>
+                <li>महिलाओं को सूर्यास्त के बाद गिरफ्तार नहीं किया जा सकता</li>
+            </ul>
+
+            <div class="section-title">
+                <span class="icon" style="background:#dcfce7">🏠</span>
+                किरायेदार के अधिकार
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>जमानत राशि वापसी</h4>
+                    <p>घर खाली करने के 30 दिन के भीतर जमानत राशि वापस मिलनी चाहिए। नुकसान साबित किए बिना राशि नहीं रोकी जा सकती।</p>
+                    <span class="law-tag">किराया नियंत्रण अधिनियम</span>
+                </div>
+                <div class="right-card" style="border-color:#16a34a">
+                    <h4>नोटिस की अवधि</h4>
+                    <p>बेदखली से पहले न्यूनतम 15–30 दिन का नोटिस जरूरी। अदालत के आदेश के बिना जबरन बेदखली नहीं होगी।</p>
+                    <span class="law-tag">संपत्ति हस्तांतरण अधिनियम</span>
+                </div>
+            </div>
+
+            <button class="print-btn" onclick="window.print()">🖨️ प्रिंट / PDF सेव करें</button>
+        </div>
+
+        <!-- ══ BENGALI ══ -->
+        <div class="lang-content" id="lang-bn">
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">🚨</span>
+                জরুরি নম্বর
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">পুলিশ / জরুরি</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">মহিলা হেল্পলাইন</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">শিশু হেল্পলাইন</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">আইনি সহায়তা</div></div>
+            </div>
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">⚖️</span>
+                মৌলিক অধিকার
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>সমতার অধিকার (অনুচ্ছেদ ১৪–১৮)</h4>
+                    <p>প্রতিটি নাগরিক আইনের সামনে সমান। ধর্ম, বর্ণ, লিঙ্গের ভিত্তিতে বৈষম্য নিষিদ্ধ।</p>
+                </div>
+                <div class="right-card" style="border-color:#7c3aed">
+                    <h4>স্বাধীনতার অধিকার (অনুচ্ছেদ ১৯–২২)</h4>
+                    <p>বাকস্বাধীনতা, চলাচলের স্বাধীনতা, পেশা বেছে নেওয়ার অধিকার। যথেচ্ছ গ্রেফতার নিষিদ্ধ।</p>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>গ্রেফতারে আপনার অধিকার</h4>
+                    <p>গ্রেফতারের কারণ জানার অধিকার। ২৪ ঘণ্টার মধ্যে ম্যাজিস্ট্রেটের সামনে হাজির করতে হবে। বিনামূল্যে আইনি সহায়তা পাওয়ার অধিকার।</p>
+                </div>
+            </div>
+            <button class="print-btn" onclick="window.print()">🖨️ প্রিন্ট / PDF সেভ করুন</button>
+        </div>
+
+        <!-- ══ TAMIL ══ -->
+        <div class="lang-content" id="lang-ta">
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">🚨</span>
+                அவசர எண்கள்
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">காவல்துறை</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">பெண்கள் உதவி</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">குழந்தை உதவி</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">சட்ட உதவி</div></div>
+            </div>
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">⚖️</span>
+                அடிப்படை உரிமைகள்
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>சமத்துவ உரிமை (சட்டப்பிரிவு 14–18)</h4>
+                    <p>ஒவ்வொரு குடிமகனும் சட்டத்தின் முன் சமம். மதம், இனம், பாலினம் அடிப்படையில் பாகுபாடு தடை.</p>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>கைது செய்யப்பட்டால் உரிமைகள்</h4>
+                    <p>கைது காரணம் தெரிந்து கொள்ளும் உரிமை. 24 மணி நேரத்தில் நீதிபதி முன் ஆஜராக வேண்டும். இலவச சட்ட உதவி பெறும் உரிமை.</p>
+                </div>
+            </div>
+            <button class="print-btn" onclick="window.print()">🖨️ அச்சிடு / PDF சேமி</button>
+        </div>
+
+        <!-- ══ TELUGU ══ -->
+        <div class="lang-content" id="lang-te">
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">🚨</span>
+                అత్యవసర సంఖ్యలు
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">పోలీస్ / అత్యవసరం</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">మహిళా హెల్ప్‌లైన్</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">చిల్డ్రన్ హెల్ప్‌లైన్</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">న్యాయ సహాయం</div></div>
+            </div>
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">⚖️</span>
+                ప్రాథమిక హక్కులు
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>సమానత్వపు హక్కు (అనుచ్ఛేదాలు 14–18)</h4>
+                    <p>ప్రతి పౌరుడూ చట్టం ముందు సమానం. మతం, కులం, లింగం ఆధారంగా వివక్ష నిషేధం.</p>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>అరెస్టు అయినపుడు హక్కులు</h4>
+                    <p>అరెస్టు కారణం తెలుసుకునే హక్కు. 24 గంటల్లో మేజిస్ట్రేట్ ముందు హాజరు. ఉచిత న్యాయ సహాయం.</p>
+                </div>
+            </div>
+            <button class="print-btn" onclick="window.print()">🖨️ ప్రింట్ / PDF సేవ్ చేయి</button>
+        </div>
+
+        <!-- ══ KANNADA ══ -->
+        <div class="lang-content" id="lang-kn">
+            <div class="section-title">
+                <span class="icon" style="background:#fee2e2">🚨</span>
+                ತುರ್ತು ಸಂಖ್ಯೆಗಳು
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card"><div class="num">112</div><div class="label">ಪೊಲೀಸ್ / ತುರ್ತು</div></div>
+                <div class="emergency-card"><div class="num">1091</div><div class="label">ಮಹಿಳಾ ಸಹಾಯವಾಣಿ</div></div>
+                <div class="emergency-card"><div class="num">1098</div><div class="label">ಮಕ್ಕಳ ಸಹಾಯವಾಣಿ</div></div>
+                <div class="emergency-card"><div class="num">15100</div><div class="label">ಕಾನೂನು ನೆರವು</div></div>
+            </div>
+            <div class="section-title">
+                <span class="icon" style="background:#ede9fe">⚖️</span>
+                ಮೂಲಭೂತ ಹಕ್ಕುಗಳು
+            </div>
+            <div class="rights-grid">
+                <div class="right-card" style="border-color:#4f46e5">
+                    <h4>ಸಮಾನತೆಯ ಹಕ್ಕು (ಅನುಚ್ಛೇದ 14–18)</h4>
+                    <p>ಪ್ರತಿ ನಾಗರಿಕನೂ ಕಾನೂನಿನ ಮುಂದೆ ಸಮಾನ. ಧರ್ಮ, ಜಾತಿ, ಲಿಂಗ ಆಧಾರದ ತಾರತಮ್ಯ ನಿಷೇಧ.</p>
+                </div>
+                <div class="right-card" style="border-color:#dc2626">
+                    <h4>ಬಂಧನದಲ್ಲಿ ನಿಮ್ಮ ಹಕ್ಕುಗಳು</h4>
+                    <p>ಬಂಧನದ ಕಾರಣ ತಿಳಿಯುವ ಹಕ್ಕು. 24 ಗಂಟೆಗಳಲ್ಲಿ ಮ್ಯಾಜಿಸ್ಟ್ರೇಟ್ ಮುಂದೆ ಹಾಜರು. ಉಚಿತ ಕಾನೂನು ನೆರವು.</p>
+                </div>
+            </div>
+            <button class="print-btn" onclick="window.print()">🖨️ ಮುದ್ರಿಸಿ / PDF ಉಳಿಸಿ</button>
+        </div>
+
+        <!-- Offline note (shown when online too) -->
+        <div class="offline-note">
+            📵 This page is <strong>cached for offline use</strong>. Your rights are always with you — even without internet.
+            <br>When online, visit <strong>dharma-nyaya.app</strong> for AI-powered legal advice.
+        </div>
+    </div>
+
+    <script>
+    function setLang(lang) {
+        document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+        const el = document.getElementById('lang-' + lang);
+        if (el) el.classList.add('active');
+        const btns = document.querySelectorAll('.lang-btn');
+        btns.forEach(b => { if (b.onclick.toString().includes("'" + lang + "'")) b.classList.add('active'); });
+        localStorage.setItem('rights_lang', lang);
+    }
+
+    // Restore last language
+    const saved = localStorage.getItem('rights_lang');
+    if (saved && document.getElementById('lang-' + saved)) setLang(saved);
+
+    // Detect browser language
+    if (!saved) {
+        const bl = (navigator.language || '').slice(0,2);
+        const map = { hi: 'hi', bn: 'bn', ta: 'ta', te: 'te', kn: 'kn' };
+        if (map[bl]) setLang(map[bl]);
+    }
+    </script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

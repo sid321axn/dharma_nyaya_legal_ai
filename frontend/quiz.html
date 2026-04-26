@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know Your Rights — DHARMA-NYAYA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+</head>
+<body class="antialiased min-h-screen bg-gray-50">
+    <!-- Top Nav -->
+    <nav class="nav-glass w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/chat" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navChat">Chat</a>
+                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold" data-i18n="navSOS">🚨 SOS</a>
+                    <a href="/legal-aid" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navLegalAid">Legal Aid</a>
+                    <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition font-medium">⚖️ Legal Tools</a>
+                    <a href="/spot-the-trap" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🔍 Spot the Trap</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" class="bg-transparent border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <!-- Quiz Header -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-100 mb-4">
+                <span class="text-4xl">🧠</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2" data-i18n="quizTitle">Know Your Rights Quiz</h1>
+            <p class="text-gray-500 text-lg" data-i18n="quizSubtitle">Test your knowledge of Indian legal rights. Learn while you play!</p>
+        </div>
+
+        <!-- Topic Selection (before quiz) — populated immediately by quiz.js from TOPIC_META -->
+        <div id="quiz-topics" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <!-- Cards injected instantly by quiz.js; no spinner needed -->
+        </div>
+
+        <!-- Quiz Container (hidden until start) -->
+        <div id="quiz-container" class="hidden">
+            <!-- Progress bar -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                    <span id="quiz-progress-text">Question 1 of 5</span>
+                    <span id="quiz-score-live" class="font-semibold text-indigo-600">Score: 0</span>
+                </div>
+                <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question card -->
+            <div id="quiz-question-card" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <span id="quiz-q-icon" class="text-2xl">❓</span>
+                    <span id="quiz-q-number" class="text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Q1</span>
+                </div>
+                <h2 id="quiz-question" class="text-xl font-bold text-gray-800 mb-6 leading-relaxed"></h2>
+
+                <!-- Options -->
+                <div id="quiz-options" class="space-y-3"></div>
+            </div>
+
+            <!-- Explanation (shown after answering) -->
+            <div id="quiz-explanation" class="hidden bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-indigo-100 p-6 mb-6">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span id="quiz-result-icon" class="text-2xl">✅</span>
+                    <span id="quiz-result-text" class="font-bold text-lg"></span>
+                </div>
+                <p id="quiz-explanation-text" class="text-gray-700 leading-relaxed"></p>
+                <button onclick="nextQuestion()" id="quiz-next-btn" class="mt-4 px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
+                    Next Question →
+                </button>
+            </div>
+        </div>
+
+        <!-- Results (shown after quiz ends) -->
+        <div id="quiz-results" class="hidden text-center">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-10 mb-6">
+                <div id="results-emoji" class="text-6xl mb-4">🏆</div>
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2" data-i18n="quizComplete">Quiz Complete!</h2>
+                <p id="results-score" class="text-xl text-gray-600 mb-4"></p>
+
+                <div id="results-bar-container" class="w-64 mx-auto h-4 bg-gray-200 rounded-full overflow-hidden mb-6">
+                    <div id="results-bar" class="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+
+                <p id="results-message" class="text-gray-500 mb-6"></p>
+
+                <div class="flex items-center justify-center gap-4">
+                    <button onclick="location.reload()" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition" data-i18n="quizPlayAgain">
+                        Play Again 🔄
+                    </button>
+                    <a href="/chat" class="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition" data-i18n="quizAskAI">
+                        Ask Legal AI 💬
+                    </a>
+                </div>
+            </div>
+
+            <!-- Badge earned -->
+            <div id="results-badge" class="hidden inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-100 to-amber-100 border border-yellow-300 px-6 py-3 rounded-2xl">
+                <span class="text-2xl">🏅</span>
+                <span id="badge-text" class="font-bold text-amber-700"></span>
+            </div>
+        </div>
+    </main>
+
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/quiz.js"></script>
+    <script>
+        // On language change: instantly re-render topic cards, then prefetch questions in background
+        const quizLangSelect = document.getElementById('lang-select');
+        if (quizLangSelect) {
+            quizLangSelect.addEventListener('change', (e) => {
+                const newLang = e.target.value;
+                setLanguage(newLang);
+                renderTopicCards(newLang);   // instant card swap
+                loadQuizBank(newLang);        // background prefetch
+            });
+        }
+    </script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHARMA-NYAYA — Offline Step-by-Step Guides</title>
+    <meta name="description" content="What to do RIGHT NOW in a legal emergency — works fully offline, in your language.">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <style>
+        :root {
+            --indigo: #4f46e5;
+            --purple: #7c3aed;
+            --red: #dc2626;
+            --green: #16a34a;
+            --amber: #d97706;
+            --blue: #1d4ed8;
+            --gray: #6b7280;
+            --bg: #f8f9ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif;
+            background: var(--bg);
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        .banner {
+            background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+        .banner h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: .25rem; }
+        .banner p { font-size: .9rem; opacity: .9; }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.4);
+            color: white;
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .2rem .7rem;
+            border-radius: 999px;
+            margin-top: .5rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+        /* Language selector */
+        .lang-row {
+            display: flex; gap: .4rem; flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+        .lang-btn {
+            background: white; border: 1px solid #e5e7eb;
+            padding: .4rem .9rem; border-radius: 999px;
+            font-size: .8rem; font-weight: 600; cursor: pointer;
+            transition: all .15s;
+        }
+        .lang-btn:hover { border-color: var(--indigo); color: var(--indigo); }
+        .lang-btn.active { background: var(--indigo); color: white; border-color: var(--indigo); }
+
+        /* Search */
+        .search {
+            width: 100%;
+            padding: .8rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: .95rem;
+            margin-bottom: 1.25rem;
+            background: white;
+        }
+        .search:focus { outline: none; border-color: var(--indigo); }
+
+        /* Scenario card */
+        .scenario {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: box-shadow .2s;
+        }
+        .scenario:hover { box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+        .scenario summary {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            list-style: none;
+        }
+        .scenario summary::-webkit-details-marker { display: none; }
+        .scenario summary::after {
+            content: "+";
+            margin-left: auto;
+            font-size: 1.5rem; color: var(--gray); font-weight: 400;
+        }
+        .scenario[open] summary::after { content: "−"; }
+        .scenario .icon {
+            font-size: 1.8rem;
+            width: 48px; text-align: center; flex-shrink: 0;
+        }
+        .scenario .title-block { flex: 1; min-width: 0; }
+        .scenario .subtitle {
+            font-size: .8rem; font-weight: 400; color: var(--gray);
+            margin-top: .15rem;
+        }
+        .body {
+            padding: 0 1.25rem 1.25rem;
+            border-top: 1px solid #f3f4f6;
+        }
+        .step {
+            padding: .85rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .step:last-child { border-bottom: none; }
+        .step-num {
+            display: inline-block;
+            width: 28px; height: 28px; line-height: 28px;
+            background: var(--indigo); color: white;
+            border-radius: 50%; text-align: center;
+            font-weight: 700; font-size: .85rem;
+            margin-right: .6rem;
+        }
+        .step-title { font-weight: 700; display: inline; }
+        .step ul { margin: .5rem 0 0 2.4rem; padding: 0; }
+        .step li {
+            margin: .3rem 0;
+            list-style: none;
+            position: relative;
+            padding-left: 1.2rem;
+        }
+        .step li::before {
+            content: "▸";
+            position: absolute; left: 0;
+            color: var(--indigo); font-weight: 700;
+        }
+        .warn {
+            background: #fef3c7;
+            border-left: 4px solid var(--amber);
+            padding: .6rem .9rem; margin-top: .6rem;
+            border-radius: 0 8px 8px 0;
+            font-size: .87rem;
+        }
+        .call {
+            background: #dcfce7;
+            border-left: 4px solid var(--green);
+            padding: .6rem .9rem; margin-top: .6rem;
+            border-radius: 0 8px 8px 0;
+            font-size: .87rem;
+        }
+        .call a {
+            color: var(--green); font-weight: 700; text-decoration: none;
+            margin-right: .8rem;
+        }
+        .call a:hover { text-decoration: underline; }
+
+        .empty {
+            text-align: center;
+            color: var(--gray);
+            padding: 2rem;
+            font-style: italic;
+        }
+        .topnav {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: .6rem 1rem;
+            display: flex; align-items: center;
+            gap: .8rem;
+        }
+        .topnav a {
+            color: var(--indigo); text-decoration: none;
+            font-size: .9rem; font-weight: 600;
+        }
+        .print-btn {
+            display: block; margin: 0 auto 1rem;
+            background: white; border: 1px solid #e5e7eb;
+            padding: .6rem 1.5rem; border-radius: 999px;
+            font-size: .85rem; cursor: pointer; font-weight: 600;
+        }
+        @media print {
+            .lang-row, .search, .topnav, .print-btn { display: none; }
+            .scenario { break-inside: avoid; border: 1px solid #ccc; }
+            .scenario .body { display: block !important; }
+            details > summary::after { display: none; }
+            details:not([open]) > .body { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="topnav">
+        <a href="/">← Home</a>
+        <a href="/sos">🚨 SOS</a>
+        <a href="/offline-rights">📜 Rights Card</a>
+    </nav>
+
+    <header class="banner">
+        <h1>📋 <span data-i18n="title">Step-by-Step Guides</span></h1>
+        <p data-i18n="subtitle">What to do RIGHT NOW in a legal emergency</p>
+        <span class="badge" data-i18n="offlineBadge">✓ Works completely offline</span>
+    </header>
+
+    <main class="container">
+        <!-- Language selector -->
+        <div class="lang-row" id="lang-row"></div>
+
+        <input type="search" class="search" id="search" placeholder="Search...">
+
+        <button class="print-btn" onclick="window.print()" data-i18n="printBtn">🖨 Print this guide (paper backup)</button>
+
+        <div id="guides-list"></div>
+        <p class="empty" id="empty" style="display:none" data-i18n="empty">No matching guide found.</p>
+    </main>
+
+    <script>
+    /* ── UI strings per language ─────────────────────────────────────────── */
+    const UI = {
+        en: { title: "Step-by-Step Guides", subtitle: "What to do RIGHT NOW in a legal emergency", offlineBadge: "✓ Works completely offline", searchPlaceholder: "Search guides…", printBtn: "🖨 Print this guide (paper backup)", empty: "No matching guide found.", warnLabel: "⚠ DO NOT", callLabel: "📞 Call now:" },
+        hi: { title: "चरण-दर-चरण मार्गदर्शिका", subtitle: "कानूनी आपात स्थिति में अभी क्या करें", offlineBadge: "✓ पूरी तरह ऑफलाइन काम करती है", searchPlaceholder: "खोजें…", printBtn: "🖨 कागज़ पर प्रिंट करें", empty: "कोई मार्गदर्शिका नहीं मिली।", warnLabel: "⚠ ये न करें", callLabel: "📞 अभी कॉल करें:" },
+        te: { title: "దశల వారీ మార్గదర్శకాలు", subtitle: "చట్టపరమైన అత్యవసర పరిస్థితిలో ఇప్పుడు ఏమి చేయాలి", offlineBadge: "✓ పూర్తిగా ఆఫ్‌లైన్‌లో పనిచేస్తుంది", searchPlaceholder: "శోధించండి…", printBtn: "🖨 కాగితంపై ముద్రించండి", empty: "మార్గదర్శి దొరకలేదు.", warnLabel: "⚠ చేయవద్దు", callLabel: "📞 ఇప్పుడే కాల్ చేయండి:" },
+        kn: { title: "ಹಂತ-ಹಂತದ ಮಾರ್ಗಸೂಚಿಗಳು", subtitle: "ಕಾನೂನು ತುರ್ತುಸ್ಥಿತಿಯಲ್ಲಿ ಈಗ ಏನು ಮಾಡಬೇಕು", offlineBadge: "✓ ಸಂಪೂರ್ಣವಾಗಿ ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ", searchPlaceholder: "ಹುಡುಕಿ…", printBtn: "🖨 ಕಾಗದದ ಮೇಲೆ ಮುದ್ರಿಸಿ", empty: "ಮಾರ್ಗಸೂಚಿ ಕಂಡುಬಂದಿಲ್ಲ.", warnLabel: "⚠ ಮಾಡಬೇಡಿ", callLabel: "📞 ಈಗ ಕರೆ ಮಾಡಿ:" },
+        sat: { title: "ᱫᱷᱟᱯ-ᱫᱷᱟᱯ ᱢᱟᱨᱜᱚᱫᱚᱨᱥᱤᱠᱟ", subtitle: "ᱟᱨᱴᱷᱤᱱ ᱟᱯᱟᱛ ᱨᱮ ᱱᱤᱛ ᱪᱮᱫ ᱪᱤᱠᱟᱹ", offlineBadge: "✓ ᱯᱩᱨᱟ ᱚᱯᱷᱞᱟᱭᱤᱱ ᱠᱟᱹᱢᱤ", searchPlaceholder: "ᱯᱟᱱᱛᱮ…", printBtn: "🖨 ᱠᱟᱹᱜᱚᱡ ᱨᱮ ᱪᱷᱟᱯᱟ", empty: "ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱧᱟᱢ.", warnLabel: "⚠ ᱟᱞᱚ ᱪᱤᱠᱟᱹ", callLabel: "📞 ᱱᱤᱛ ᱯᱷᱚᱱ ᱪᱤᱠᱟᱹ:" },
+        uk: { title: "Покрокові інструкції", subtitle: "Що робити ПРЯМО ЗАРАЗ у юридичній кризі", offlineBadge: "✓ Повністю працює офлайн", searchPlaceholder: "Пошук…", printBtn: "🖨 Роздрукувати на папері", empty: "Інструкцію не знайдено.", warnLabel: "⚠ НЕ робіть", callLabel: "📞 Зателефонуйте зараз:" }
+    };
+
+    const LANG_NAMES = {
+        en: "English", hi: "हिन्दी", te: "తెలుగు", kn: "ಕನ್ನಡ",
+        sat: "ᱥᱟᱱᱛᱟᱲᱤ", uk: "Українська"
+    };
+
+    /* ── Guides data ─────────────────────────────────────────────────────────
+       Each scenario has: id, audience ("india" or "ukraine"), and per-language
+       content { icon, title, subtitle, steps[{title, points[], warn?, call?}] }
+    */
+    const GUIDES = [
+      // ════ INDIA SCENARIOS ════
+      {
+        id: "arrest", audience: "india",
+        en: { icon: "🚔", title: "Police arrived / someone is being arrested", subtitle: "What to do in the first 24 hours",
+          steps: [
+            { title: "Ask for the reason — IT IS YOUR RIGHT", points: ["Article 22 of the Constitution: police MUST tell you why.", "Demand to see the arrest memo or warrant.", "Note time, place, officer name & badge number."] },
+            { title: "Inform a family member", points: ["Section 50A BNSS: police MUST allow you to inform one family member.", "Say loudly: 'I want to inform my family.'", "Ask them to call NALSA 15100 for a free lawyer."],
+              warn: "Do NOT sign any blank paper or confession without a lawyer." },
+            { title: "Maximum 24 hours without a magistrate", points: ["You CANNOT be detained beyond 24 hours without being produced before a magistrate.", "If detained longer — file Habeas Corpus through District Court."] },
+            { title: "Demand a free lawyer", points: ["Article 39A guarantees free legal aid.", "Call District Legal Services Authority (DLSA) — every district has one."],
+              call: [{label:"NALSA", num:"15100"}, {label:"Police", num:"112"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        hi: { icon: "🚔", title: "पुलिस आ गई / किसी को गिरफ्तार किया जा रहा है", subtitle: "पहले 24 घंटे में क्या करें",
+          steps: [
+            { title: "कारण पूछें — यह आपका अधिकार है", points: ["संविधान का अनुच्छेद 22: पुलिस को कारण बताना ज़रूरी है।", "गिरफ्तारी मेमो या वारंट दिखाने को कहें।", "समय, जगह, अफसर का नाम और बैज नंबर लिख लें।"] },
+            { title: "परिवार को सूचित करें", points: ["BNSS धारा 50A: पुलिस को एक परिजन को सूचित करने की अनुमति देनी होगी।", "ज़ोर से कहें: 'मुझे अपने परिवार को बताना है।'", "उनसे NALSA 15100 पर मुफ्त वकील के लिए कॉल करवाएं।"],
+              warn: "वकील के बिना कोई खाली कागज़ या इकबालिया बयान न साइन करें।" },
+            { title: "मजिस्ट्रेट के बिना अधिकतम 24 घंटे", points: ["24 घंटे से ज़्यादा हिरासत में नहीं रख सकते — मजिस्ट्रेट के सामने पेश करना होगा।", "अगर ज़्यादा रखा गया — जिला न्यायालय में बंदी प्रत्यक्षीकरण (Habeas Corpus) दायर करें।"] },
+            { title: "मुफ्त वकील की मांग करें", points: ["अनुच्छेद 39A मुफ्त कानूनी सहायता की गारंटी देता है।", "जिला कानूनी सेवा प्राधिकरण (DLSA) को कॉल करें — हर जिले में है।"],
+              call: [{label:"NALSA", num:"15100"}, {label:"पुलिस", num:"112"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        te: { icon: "🚔", title: "పోలీసులు వచ్చారు / ఎవరో అరెస్టు అవుతున్నారు", subtitle: "మొదటి 24 గంటల్లో ఏమి చేయాలి",
+          steps: [
+            { title: "కారణం అడగండి — ఇది మీ హక్కు", points: ["రాజ్యాంగంలోని అధికరణ 22: పోలీసులు కారణం చెప్పాల్సిందే.", "అరెస్టు మెమో లేదా వారెంట్ చూపమని డిమాండ్ చేయండి.", "సమయం, స్థలం, అధికారి పేరు మరియు బ్యాడ్జ్ నంబర్ రాసుకోండి."] },
+            { title: "కుటుంబ సభ్యుడికి తెలియజేయండి", points: ["BNSS సెక్షన్ 50A: ఒక కుటుంబ సభ్యుడికి తెలియజేయడానికి అనుమతించాలి.", "గట్టిగా చెప్పండి: 'నా కుటుంబానికి తెలియజేయాలి.'", "వారిని NALSA 15100కి కాల్ చేయమని చెప్పండి."],
+              warn: "న్యాయవాది లేకుండా ఏ ఖాళీ కాగితం లేదా ఒప్పుకోలు వ్రాతపై సంతకం చేయవద్దు." },
+            { title: "మేజిస్ట్రేట్ లేకుండా గరిష్టంగా 24 గంటలు", points: ["24 గంటల కంటే ఎక్కువ నిర్బంధించలేరు — మేజిస్ట్రేట్ ముందు హాజరుపరచాలి.", "ఎక్కువ ఉంచితే — జిల్లా కోర్టులో హేబియస్ కార్పస్ దాఖలు చేయండి."] },
+            { title: "ఉచిత న్యాయవాదిని కోరండి", points: ["అధికరణ 39A ఉచిత న్యాయ సహాయానికి హామీ ఇస్తుంది.", "జిల్లా న్యాయ సేవల అధికార సంస్థ (DLSA)కి కాల్ చేయండి — ప్రతి జిల్లాలో ఉంది."],
+              call: [{label:"NALSA", num:"15100"}, {label:"పోలీస్", num:"112"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        kn: { icon: "🚔", title: "ಪೊಲೀಸರು ಬಂದಿದ್ದಾರೆ / ಯಾರನ್ನೋ ಬಂಧಿಸುತ್ತಿದ್ದಾರೆ", subtitle: "ಮೊದಲ 24 ಗಂಟೆಗಳಲ್ಲಿ ಏನು ಮಾಡಬೇಕು",
+          steps: [
+            { title: "ಕಾರಣ ಕೇಳಿ — ಇದು ನಿಮ್ಮ ಹಕ್ಕು", points: ["ಸಂವಿಧಾನದ ಅನುಚ್ಛೇದ 22: ಪೊಲೀಸರು ಕಾರಣ ಹೇಳಲೇಬೇಕು.", "ಬಂಧನ ಮೆಮೋ ಅಥವಾ ವಾರಂಟ್ ತೋರಿಸಲು ಬೇಡಿ.", "ಸಮಯ, ಸ್ಥಳ, ಅಧಿಕಾರಿಯ ಹೆಸರು ಮತ್ತು ಬ್ಯಾಡ್ಜ್ ಸಂಖ್ಯೆ ಬರೆದಿಡಿ."] },
+            { title: "ಕುಟುಂಬದ ಸದಸ್ಯರಿಗೆ ತಿಳಿಸಿ", points: ["BNSS ಸೆಕ್ಷನ್ 50A: ಒಬ್ಬ ಕುಟುಂಬದ ಸದಸ್ಯರಿಗೆ ತಿಳಿಸಲು ಪೊಲೀಸರು ಅವಕಾಶ ನೀಡಬೇಕು.", "ಜೋರಾಗಿ ಹೇಳಿ: 'ನನ್ನ ಕುಟುಂಬಕ್ಕೆ ತಿಳಿಸಬೇಕು.'", "ಅವರನ್ನು NALSA 15100ಗೆ ಕರೆ ಮಾಡಲು ಹೇಳಿ."],
+              warn: "ವಕೀಲರಿಲ್ಲದೆ ಯಾವುದೇ ಖಾಲಿ ಕಾಗದ ಅಥವಾ ತಪ್ಪೊಪ್ಪಿಗೆಗೆ ಸಹಿ ಹಾಕಬೇಡಿ." },
+            { title: "ಮ್ಯಾಜಿಸ್ಟ್ರೇಟ್ ಇಲ್ಲದೆ ಗರಿಷ್ಠ 24 ಗಂಟೆಗಳು", points: ["24 ಗಂಟೆಗಳಿಗಿಂತ ಹೆಚ್ಚು ಬಂಧನದಲ್ಲಿಡಲಾಗದು — ಮ್ಯಾಜಿಸ್ಟ್ರೇಟ್ ಮುಂದೆ ಹಾಜರುಪಡಿಸಬೇಕು.", "ಹೆಚ್ಚು ಸಮಯ ಬಂಧಿಸಿದರೆ — ಜಿಲ್ಲಾ ನ್ಯಾಯಾಲಯದಲ್ಲಿ ಹೇಬಿಯಸ್ ಕಾರ್ಪಸ್ ಸಲ್ಲಿಸಿ."] },
+            { title: "ಉಚಿತ ವಕೀಲರನ್ನು ಕೇಳಿ", points: ["ಅನುಚ್ಛೇದ 39A ಉಚಿತ ಕಾನೂನು ನೆರವಿಗೆ ಖಾತರಿ ನೀಡುತ್ತದೆ.", "ಜಿಲ್ಲಾ ಕಾನೂನು ಸೇವಾ ಪ್ರಾಧಿಕಾರ (DLSA)ಗೆ ಕರೆ ಮಾಡಿ."],
+              call: [{label:"NALSA", num:"15100"}, {label:"ಪೊಲೀಸ್", num:"112"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        sat: { icon: "🚔", title: "ᱯᱩᱞᱤᱥ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ / ᱢᱤᱫ ᱦᱚᱲ ᱫᱚᱦᱚ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ", subtitle: "ᱢᱟᱨᱟᱝ 24 ᱴᱟᱲᱟᱝ ᱨᱮ ᱪᱮᱫ ᱪᱤᱠᱟᱹ",
+          steps: [
+            { title: "ᱠᱟᱨᱚᱱ ᱯᱩᱪᱷᱟᱣ — ᱱᱚᱣᱟ ᱟᱢᱟᱜ ᱦᱚᱠ", points: ["ᱥᱚᱝᱵᱤᱫᱷᱟᱱ ᱨᱮᱱᱟᱜ ᱫᱷᱟᱨᱟ 22: ᱯᱩᱞᱤᱥ ᱦᱚᱸ ᱠᱟᱨᱚᱱ ᱢᱮᱱ ᱦᱩᱭ.", "ᱜᱤᱨᱚᱯᱷᱛᱟᱨᱤ ᱢᱮᱢᱳ ᱟᱨ ᱣᱟᱨᱮᱱᱴ ᱫᱮᱠᱷᱟᱣ ᱟᱨᱡᱤ.", "ᱴᱟᱲᱟᱝ, ᱴᱷᱟᱸᱣ, ᱚᱯᱷᱤᱥᱟᱨ ᱧᱩᱛᱩᱢ ᱟᱨ ᱵᱟᱡ ᱱᱚᱢᱵᱚᱨ ᱚᱞ ᱫᱚᱦᱚ."] },
+            { title: "ᱚᱲᱟᱜ ᱨᱮᱭᱟᱜ ᱦᱚᱲ ᱢᱮᱱᱟᱭ", points: ["BNSS ᱫᱷᱟᱨᱟ 50A: ᱢᱤᱫ ᱯᱟᱨᱤᱵᱟᱨ ᱦᱚᱲ ᱢᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱯᱩᱞᱤᱥ ᱪᱷᱩᱴᱤ ᱮᱢᱚᱜ ᱦᱩᱭ.", "ᱢᱟᱨᱟᱝ ᱢᱮᱱ: 'ᱤᱧ ᱟᱢᱟᱜ ᱯᱟᱨᱤᱵᱟᱨ ᱢᱮᱱ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ.'", "NALSA 15100 ᱨᱮ ᱯᱷᱳᱱ ᱪᱤᱠᱟᱹ ᱪᱷᱷᱩᱴᱤ ᱣᱟᱠᱤᱞ ᱞᱟᱹᱜᱤᱫ."],
+              warn: "ᱣᱟᱠᱤᱞ ᱵᱟᱝᱠᱷᱟᱱ ᱪᱷᱳᱸᱪᱷ ᱠᱟᱹᱜᱚᱡ ᱟᱞᱚ ᱥᱟᱭᱤᱱ." },
+            { title: "ᱢᱮᱡᱤᱥᱴᱨᱮᱴ ᱵᱟᱝ ᱦᱚᱸ ᱢᱟᱨᱟᱝ 24 ᱴᱟᱲᱟᱝ", points: ["24 ᱴᱟᱲᱟᱝ ᱠᱷᱚᱱ ᱢᱟᱨᱟᱝ ᱫᱚᱦᱚ ᱵᱟᱝ ᱦᱩᱭ — ᱢᱮᱡᱤᱥᱴᱨᱮᱴ ᱨᱮ ᱦᱟᱡᱟᱨ ᱦᱩᱭ.", "ᱵᱷᱟᱹᱜᱤ ᱫᱚᱦᱚ ᱨᱮ ᱡᱤᱞᱟ ᱠᱳᱨᱴ ᱨᱮ ᱦᱮᱵᱤᱭᱟᱥ ᱠᱳᱨᱯᱟᱥ ᱫᱚᱦᱚ."] },
+            { title: "ᱪᱷᱷᱩᱴᱤ ᱣᱟᱠᱤᱞ ᱢᱟᱝ", points: ["ᱫᱷᱟᱨᱟ 39A ᱪᱷᱷᱩᱴᱤ ᱠᱟᱱᱩᱱᱤ ᱜᱳᱲᱚ ᱮᱢᱚᱜ ᱠᱟᱱᱟ.", "DLSA ᱨᱮ ᱯᱷᱳᱱ ᱪᱤᱠᱟᱹ — ᱡᱚᱛᱚ ᱡᱤᱞᱟ ᱨᱮ ᱢᱮᱱᱟᱜ ᱟ."],
+              call: [{label:"NALSA", num:"15100"}, {label:"ᱯᱩᱞᱤᱥ", num:"112"}] }
+          ]
+        }
+      },
+      {
+        id: "land", audience: "india",
+        en: { icon: "🌾", title: "My land is being grabbed / illegally occupied", subtitle: "Stop it before they finish construction",
+          steps: [
+            { title: "Document the encroachment NOW", points: ["Take dated photos & video of the spot.", "Get 2-3 neighbours as witnesses (note their names & numbers).", "Save your patta / khasra / sale deed copy somewhere safe."] },
+            { title: "File a written complaint at the police station", points: ["Go to the nearest station — file a complaint under IPC 441 (criminal trespass).", "Demand a copy of the FIR or DD entry.", "If police refuse — file a Zero FIR at ANY station (you have this right)."],
+              warn: "Do NOT physically confront the trespassers — let the law handle it." },
+            { title: "Approach the Tehsildar / SDM", points: ["File a written application for partition or boundary dispute.", "Demand patwari/lekhpal site inspection within 7 days.", "Keep stamped acknowledgment copies of every paper you submit."] },
+            { title: "Get free legal help", points: ["DLSA office in your district will give a free lawyer.", "Free help also available from Tehsil Legal Services Committee."],
+              call: [{label:"NALSA", num:"15100"}, {label:"Police", num:"112"}] }
+          ]
+        },
+        hi: { icon: "🌾", title: "मेरी ज़मीन कब्जा हो रही है / अवैध कब्जा", subtitle: "निर्माण पूरा होने से पहले रोकें",
+          steps: [
+            { title: "अतिक्रमण का सबूत अभी बनाएं", points: ["तारीख के साथ फोटो और वीडियो लें।", "2-3 पड़ोसी गवाह बनाएं (नाम और नंबर लिखें)।", "अपना पट्टा/खसरा/बैनामा सुरक्षित जगह रखें।"] },
+            { title: "थाने में लिखित शिकायत दर्ज करें", points: ["नजदीकी थाने जाएं — IPC 441 (आपराधिक अतिचार) के तहत शिकायत।", "FIR या DD की कॉपी मांगें।", "अगर पुलिस मना करे — किसी भी थाने में Zero FIR दर्ज कराएं।"],
+              warn: "खुद से कब्जाधारियों से न उलझें — कानून को काम करने दें।" },
+            { title: "तहसीलदार/SDM के पास जाएं", points: ["बंटवारा या सीमा विवाद का लिखित आवेदन।", "पटवारी/लेखपाल से 7 दिन में मौका मुआयना मांगें।", "हर कागज़ की मुहरबंद पावती (acknowledgment) रखें।"] },
+            { title: "मुफ्त कानूनी मदद लें", points: ["जिला DLSA मुफ्त वकील देगा।", "तहसील कानूनी सेवा समिति भी मुफ्त मदद करती है।"],
+              call: [{label:"NALSA", num:"15100"}, {label:"पुलिस", num:"112"}] }
+          ]
+        },
+        te: { icon: "🌾", title: "నా భూమి ఆక్రమించబడుతోంది", subtitle: "నిర్మాణం పూర్తయ్యే ముందే ఆపండి",
+          steps: [
+            { title: "ఆక్రమణకు తేదీతో సాక్ష్యం తీయండి", points: ["తేదీతో ఫోటోలు మరియు వీడియోలు తీసుకోండి.", "2-3 పొరుగువారిని సాక్షులుగా (పేర్లు, నంబర్లు) గుర్తుంచుకోండి.", "మీ పట్టా/ఖాస్రా/రిజిస్ట్రేషన్ పత్రం సురక్షితంగా ఉంచండి."] },
+            { title: "పోలీస్ స్టేషన్‌లో లిఖిత ఫిర్యాదు", points: ["దగ్గర్లోని స్టేషన్‌కు వెళ్లండి — IPC 441 (క్రిమినల్ ట్రెస్‌పాస్) కింద ఫిర్యాదు.", "FIR కాపీ తీసుకోండి.", "నిరాకరిస్తే — ఏ స్టేషన్‌లోనైనా Zero FIR దాఖలు చేయండి."],
+              warn: "ఆక్రమణదారులతో మీరే తలపడవద్దు — చట్టానికి వదిలేయండి." },
+            { title: "తహసీల్దార్/SDMను సంప్రదించండి", points: ["విభజన లేదా సరిహద్దు వివాదం కోసం లిఖిత దరఖాస్తు.", "పట్వారీ/లేఖ్‌పాల్ 7 రోజుల్లో తనిఖీ డిమాండ్ చేయండి.", "ప్రతి పత్రం యొక్క ముద్రిత రసీదు ఉంచండి."] },
+            { title: "ఉచిత న్యాయ సహాయం", points: ["జిల్లా DLSA ఉచిత న్యాయవాదిని ఇస్తుంది."],
+              call: [{label:"NALSA", num:"15100"}, {label:"పోలీస్", num:"112"}] }
+          ]
+        },
+        kn: { icon: "🌾", title: "ನನ್ನ ಭೂಮಿಯನ್ನು ಆಕ್ರಮಿಸಲಾಗುತ್ತಿದೆ", subtitle: "ನಿರ್ಮಾಣ ಮುಗಿಯುವ ಮುನ್ನ ತಡೆಯಿರಿ",
+          steps: [
+            { title: "ಆಕ್ರಮಣಕ್ಕೆ ದಿನಾಂಕದೊಂದಿಗೆ ಸಾಕ್ಷ್ಯ", points: ["ದಿನಾಂಕದೊಂದಿಗೆ ಫೋಟೋ ಮತ್ತು ವೀಡಿಯೋ ತೆಗೆಯಿರಿ.", "2-3 ನೆರೆಹೊರೆಯವರನ್ನು ಸಾಕ್ಷಿಗಳನ್ನಾಗಿ (ಹೆಸರು, ಸಂಖ್ಯೆ) ಪಡೆಯಿರಿ.", "ನಿಮ್ಮ ಪಟ್ಟಾ/ಖಾಸ್ರಾ/ಮಾರಾಟ ಪತ್ರ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ."] },
+            { title: "ಪೊಲೀಸ್ ಠಾಣೆಯಲ್ಲಿ ಲಿಖಿತ ದೂರು", points: ["ಸಮೀಪದ ಠಾಣೆಗೆ ಹೋಗಿ — IPC 441 ಅಡಿ ದೂರು ದಾಖಲಿಸಿ.", "FIR ನಕಲು ಪಡೆಯಿರಿ.", "ನಿರಾಕರಿಸಿದರೆ — ಯಾವುದೇ ಠಾಣೆಯಲ್ಲಿ Zero FIR ದಾಖಲಿಸಿ."],
+              warn: "ಆಕ್ರಮಣಕಾರರೊಂದಿಗೆ ನೀವೇ ಮುಖಾಮುಖಿಯಾಗಬೇಡಿ — ಕಾನೂನಿಗೆ ಬಿಡಿ." },
+            { title: "ತಹಸೀಲ್ದಾರ್/SDM ಬಳಿ", points: ["ವಿಭಜನೆ ಅಥವಾ ಗಡಿ ವಿವಾದದ ಲಿಖಿತ ಅರ್ಜಿ.", "ಪಟ್ವಾರಿ/ಲೇಖಪಾಲ್ 7 ದಿನಗಳಲ್ಲಿ ಸ್ಥಳ ಪರಿಶೀಲನೆ ಬೇಡಿ."] },
+            { title: "ಉಚಿತ ಕಾನೂನು ಸಹಾಯ", points: ["ಜಿಲ್ಲಾ DLSA ಉಚಿತ ವಕೀಲರನ್ನು ಒದಗಿಸುತ್ತದೆ."],
+              call: [{label:"NALSA", num:"15100"}, {label:"ಪೊಲೀಸ್", num:"112"}] }
+          ]
+        },
+        sat: { icon: "🌾", title: "ᱤᱧᱟᱜ ᱚᱛ ᱫᱚᱦᱚ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ", subtitle: "ᱪᱮᱫᱟᱜ ᱯᱩᱨᱟᱣ ᱢᱟᱲᱟᱝ ᱨᱚᱠᱷᱚᱭ",
+          steps: [
+            { title: "ᱱᱤᱛ ᱥᱟᱠᱷᱤ ᱵᱮᱱᱟᱣ", points: ["ᱢᱟᱦᱟᱸ ᱨᱮᱭᱟᱜ ᱯᱷᱳᱴᱚ ᱟᱨ ᱣᱤᱰᱤᱭᱳ ᱦᱟᱛᱟᱣ.", "2-3 ᱯᱟᱲᱳᱥᱤ ᱥᱟᱠᱷᱤ ᱵᱮᱱᱟᱣ.", "ᱯᱟᱴᱟ/ᱠᱷᱟᱥᱨᱟ ᱫᱚᱦᱚ."] },
+            { title: "ᱴᱷᱟᱱᱟ ᱨᱮ ᱪᱤᱴᱷᱤ ᱥᱤᱠᱟᱭᱟᱛ", points: ["IPC 441 ᱫᱷᱟᱨᱟ ᱨᱮ ᱥᱤᱠᱟᱭᱟᱛ.", "FIR ᱱᱚᱠᱚᱞ ᱢᱟᱝ.", "ᱯᱩᱞᱤᱥ ᱵᱟᱝᱠᱷᱟᱱ Zero FIR ᱫᱚᱦᱚ."] },
+            { title: "ᱛᱷᱮᱥᱤᱞᱫᱟᱨ ᱨᱮ ᱪᱟᱞᱟᱣ", points: ["ᱪᱤᱴᱷᱤ ᱫᱨᱚᱠᱷᱟᱥᱛ ᱫᱚᱦᱚ."] }
+          ]
+        }
+      },
+      {
+        id: "wages", audience: "india",
+        en: { icon: "💰", title: "Wages not paid (MNREGA / employer)", subtitle: "Reclaim what is yours within weeks",
+          steps: [
+            { title: "Gather your evidence", points: ["Job card number, work dates, supervisor name.", "Muster roll entries (you can demand to see them — RTI right).", "Bank account / Aadhaar payment record."] },
+            { title: "File a written complaint", points: ["MNREGA: Submit to the Block Development Officer (BDO). Acknowledgment is mandatory.", "Private employer: Complaint to the Labour Commissioner office (free, no lawyer needed).", "Use the National MNREGA grievance portal: NREGAsoft."] },
+            { title: "Demand compensation", points: ["MNREGA Act guarantees compensation for delay in wage payment beyond 15 days.", "Section 25 of Payment of Wages Act: penalty on employer for non-payment."] },
+            { title: "If still ignored", points: ["File RTI to know status of complaint.", "Approach State Human Rights Commission or NHRC."],
+              call: [{label:"Labour Helpline", num:"155300"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        hi: { icon: "💰", title: "मजदूरी नहीं मिली (MNREGA / मालिक)", subtitle: "हफ्तों में अपना हक़ वापस लें",
+          steps: [
+            { title: "सबूत इकट्ठा करें", points: ["जॉब कार्ड नंबर, काम की तारीखें, सुपरवाइज़र का नाम।", "मस्टर रोल एंट्री (RTI से देख सकते हैं)।", "बैंक/आधार भुगतान रिकॉर्ड।"] },
+            { title: "लिखित शिकायत दर्ज करें", points: ["MNREGA: ब्लॉक विकास अधिकारी (BDO) को दें। पावती ज़रूरी।", "निजी मालिक: श्रम आयुक्त कार्यालय में (मुफ्त, बिना वकील)।", "NREGAsoft पोर्टल पर भी।"] },
+            { title: "मुआवज़ा मांगें", points: ["MNREGA अधिनियम 15 दिन से ज़्यादा देरी पर मुआवज़ा देता है।", "Payment of Wages Act धारा 25: जुर्माना।"] },
+            { title: "अगर अनदेखी हो", points: ["RTI से शिकायत की स्थिति पूछें।", "राज्य/राष्ट्रीय मानवाधिकार आयोग जाएं।"],
+              call: [{label:"श्रमिक हेल्पलाइन", num:"155300"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        te: { icon: "💰", title: "వేతనం రాలేదు (MNREGA / యజమాని)", subtitle: "వారాల్లో మీ హక్కును పొందండి",
+          steps: [
+            { title: "సాక్ష్యం సేకరించండి", points: ["జాబ్ కార్డు సంఖ్య, పని తేదీలు, సూపర్‌వైజర్ పేరు.", "మస్టర్ రోల్ ఎంట్రీలు (RTI ద్వారా చూడవచ్చు).", "బ్యాంక్/ఆధార్ చెల్లింపు రికార్డు."] },
+            { title: "లిఖిత ఫిర్యాదు", points: ["MNREGA: BDOకి సమర్పించండి. రసీదు తప్పనిసరి.", "ప్రైవేట్ యజమాని: లేబర్ కమిషనర్ కార్యాలయానికి.", "NREGAsoft పోర్టల్‌లో కూడా."] },
+            { title: "నష్టపరిహారం", points: ["MNREGA చట్టం 15 రోజులకు మించి జాప్యానికి పరిహారం ఇస్తుంది."] },
+            { title: "ఇంకా నిర్లక్ష్యం చేస్తే", points: ["RTI ద్వారా స్థితి అడగండి.", "మానవ హక్కుల కమిషన్‌ను సంప్రదించండి."],
+              call: [{label:"లేబర్ హెల్ప్‌లైన్", num:"155300"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        kn: { icon: "💰", title: "ಸಂಬಳ ಸಿಗಲಿಲ್ಲ (MNREGA / ಮಾಲೀಕ)", subtitle: "ವಾರಗಳಲ್ಲಿ ನಿಮ್ಮ ಹಕ್ಕು ಪಡೆಯಿರಿ",
+          steps: [
+            { title: "ಸಾಕ್ಷ್ಯ ಸಂಗ್ರಹಿಸಿ", points: ["ಜಾಬ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆ, ಕೆಲಸದ ದಿನಾಂಕಗಳು, ಮೇಲ್ವಿಚಾರಕರ ಹೆಸರು.", "ಮಸ್ಟರ್ ರೋಲ್ (RTI ಮೂಲಕ ನೋಡಿ).", "ಬ್ಯಾಂಕ್/ಆಧಾರ್ ಪಾವತಿ ದಾಖಲೆ."] },
+            { title: "ಲಿಖಿತ ದೂರು", points: ["MNREGA: BDOಗೆ ಸಲ್ಲಿಸಿ. ರಸೀದಿ ಕಡ್ಡಾಯ.", "ಖಾಸಗಿ ಮಾಲೀಕ: ಲೇಬರ್ ಆಯುಕ್ತರ ಕಚೇರಿಗೆ.", "NREGAsoft ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ಸಹ."] },
+            { title: "ಪರಿಹಾರ ಕೇಳಿ", points: ["MNREGA ಕಾಯ್ದೆ 15 ದಿನಗಳ ತಡವಾದ ಪಾವತಿಗೆ ಪರಿಹಾರ ನೀಡುತ್ತದೆ."] },
+            { title: "ಇನ್ನೂ ನಿರ್ಲಕ್ಷಿಸಿದರೆ", points: ["RTI ಮೂಲಕ ಸ್ಥಿತಿ ಕೇಳಿ.", "ಮಾನವ ಹಕ್ಕುಗಳ ಆಯೋಗ ಸಂಪರ್ಕಿಸಿ."],
+              call: [{label:"ಲೇಬರ್ ಸಹಾಯವಾಣಿ", num:"155300"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        sat: { icon: "💰", title: "ᱢᱟᱡᱫᱩᱨᱤ ᱵᱟᱝ ᱧᱟᱢ (MNREGA)", subtitle: "ᱫᱷᱟᱯ-ᱫᱷᱟᱯ ᱦᱚᱠ ᱦᱟᱛᱟᱣ",
+          steps: [
+            { title: "ᱥᱟᱠᱷᱤ ᱡᱚᱨᱚᱣ", points: ["ᱡᱚᱵ ᱠᱟᱨᱰ ᱱᱚᱢᱵᱚᱨ, ᱠᱟᱹᱢᱤ ᱫᱤᱱ.", "ᱢᱟᱥᱴᱚᱨ ᱨᱳᱞ (RTI ᱦᱚᱱᱚᱨ).", "ᱵᱮᱝᱠ ᱨᱤᱠᱚᱨᱰ."] },
+            { title: "ᱪᱤᱴᱷᱤ ᱥᱤᱠᱟᱭᱟᱛ", points: ["BDO ᱨᱮ ᱫᱚᱦᱚ.", "ᱨᱚᱥᱤᱫ ᱫᱚᱦᱚ."] },
+            { title: "ᱢᱩᱣᱟᱣᱡᱟ ᱢᱟᱝ", points: ["MNREGA ᱫᱷᱟᱨᱟ 15 ᱫᱤᱱ ᱫᱷᱷᱤᱞᱟ ᱨᱮ ᱢᱩᱣᱟᱣᱡᱟ."],
+              call: [{label:"ᱞᱮᱵᱟᱨ ᱦᱮᱞᱯᱞᱟᱭᱤᱱ", num:"155300"}] }
+          ]
+        }
+      },
+      {
+        id: "fir-refused", audience: "india",
+        en: { icon: "📝", title: "Police refuse to file my FIR", subtitle: "They cannot legally refuse — here's how",
+          steps: [
+            { title: "Insist & cite the law", points: ["Section 173 BNSS (was 154 CrPC): police MUST register an FIR for cognizable offence.", "Lalita Kumari v. State (2014) — Supreme Court: registration is MANDATORY.", "Stay calm. Write your complaint in clear language and submit in writing."] },
+            { title: "Demand a Zero FIR", points: ["Zero FIR can be filed at ANY police station, regardless of jurisdiction.", "Station MUST forward it to the correct station within 24 hours.", "If they still refuse, you have escalation rights below."] },
+            { title: "Escalate immediately", points: ["Send written complaint to the Superintendent of Police (SP) — by hand or registered post.", "If SP doesn't act in 7 days — file private complaint with the Magistrate under Section 175(3) BNSS.", "Parallel: complain to State Human Rights Commission."],
+              warn: "Save copies of EVERY paper. Get postal receipt. Note officer name & time." },
+            { title: "Free help", points: ["DLSA gives free lawyer for filing private complaint."],
+              call: [{label:"NALSA", num:"15100"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        hi: { icon: "📝", title: "पुलिस मेरी FIR नहीं लिख रही", subtitle: "वो कानूनन मना नहीं कर सकते",
+          steps: [
+            { title: "ज़िद करें और कानून बताएं", points: ["BNSS धारा 173 (पहले CrPC 154): संज्ञेय अपराध की FIR दर्ज करनी ही होगी।", "ललिता कुमारी बनाम राज्य (2014): सुप्रीम कोर्ट का फैसला — दर्ज करना अनिवार्य।", "शांत रहें। शिकायत साफ-साफ लिखकर दें।"] },
+            { title: "Zero FIR की मांग करें", points: ["Zero FIR किसी भी थाने पर दर्ज हो सकती है।", "उसे 24 घंटे में सही थाने भेजना अनिवार्य।"] },
+            { title: "तुरंत आगे बढ़ाएं", points: ["SP को लिखित शिकायत — हाथ से या रजिस्टर्ड डाक से।", "7 दिन में कार्रवाई न हो — मजिस्ट्रेट के पास निजी शिकायत (BNSS 175(3))।", "साथ में राज्य मानवाधिकार आयोग को भी।"],
+              warn: "हर कागज़ की कॉपी रखें। डाक की रसीद रखें।" },
+            { title: "मुफ्त मदद", points: ["DLSA मुफ्त वकील देगा।"],
+              call: [{label:"NALSA", num:"15100"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        te: { icon: "📝", title: "పోలీసులు FIR నమోదు చేయడం లేదు", subtitle: "వారు చట్టబద్ధంగా నిరాకరించలేరు",
+          steps: [
+            { title: "పట్టుబట్టండి, చట్టం ఉదహరించండి", points: ["BNSS సెక్షన్ 173: కాగ్నిజబుల్ నేరానికి FIR నమోదు తప్పనిసరి.", "లలిత కుమారి కేసు (2014) సుప్రీం కోర్టు తీర్పు."] },
+            { title: "Zero FIR కోరండి", points: ["ఏ స్టేషన్‌లోనైనా Zero FIR నమోదు చేయవచ్చు.", "24 గంటల్లో సరైన స్టేషన్‌కు పంపాలి."] },
+            { title: "వెంటనే ఎగువకు", points: ["SPకి లిఖిత ఫిర్యాదు.", "7 రోజుల్లో చర్య లేకపోతే — మేజిస్ట్రేట్ ముందు ప్రైవేట్ ఫిర్యాదు (BNSS 175(3))."],
+              warn: "ప్రతి కాగితం కాపీ ఉంచండి." },
+            { title: "ఉచిత సహాయం", points: ["DLSA ఉచిత న్యాయవాది."],
+              call: [{label:"NALSA", num:"15100"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        kn: { icon: "📝", title: "ಪೊಲೀಸರು FIR ದಾಖಲಿಸಲು ನಿರಾಕರಿಸುತ್ತಿದ್ದಾರೆ", subtitle: "ಅವರು ಕಾನೂನುಬದ್ಧವಾಗಿ ನಿರಾಕರಿಸಲಾಗದು",
+          steps: [
+            { title: "ಒತ್ತಾಯಿಸಿ, ಕಾನೂನು ಉಲ್ಲೇಖಿಸಿ", points: ["BNSS ಸೆಕ್ಷನ್ 173: cognizable ಅಪರಾಧಕ್ಕೆ FIR ಕಡ್ಡಾಯ.", "ಲಲಿತಾ ಕುಮಾರಿ ತೀರ್ಪು (2014) — ಸುಪ್ರೀಂ ಕೋರ್ಟ್."] },
+            { title: "Zero FIR ಕೇಳಿ", points: ["ಯಾವುದೇ ಠಾಣೆಯಲ್ಲಿ Zero FIR.", "24 ಗಂಟೆಯಲ್ಲಿ ಸರಿಯಾದ ಠಾಣೆಗೆ ರವಾನೆ."] },
+            { title: "ತಕ್ಷಣ ಮೇಲಕ್ಕೆ", points: ["SPಗೆ ಲಿಖಿತ ದೂರು.", "7 ದಿನಗಳಲ್ಲಿ ಕ್ರಮ ಇಲ್ಲದಿದ್ದರೆ — ಮ್ಯಾಜಿಸ್ಟ್ರೇಟ್ ಮುಂದೆ ಖಾಸಗಿ ದೂರು."],
+              warn: "ಪ್ರತಿ ಕಾಗದದ ನಕಲು ಇರಿಸಿ." },
+            { title: "ಉಚಿತ ಸಹಾಯ", points: ["DLSA ಉಚಿತ ವಕೀಲರು."],
+              call: [{label:"NALSA", num:"15100"}, {label:"NHRC", num:"7827170170"}] }
+          ]
+        },
+        sat: { icon: "📝", title: "ᱯᱩᱞᱤᱥ FIR ᱵᱟᱝ ᱚᱞ", subtitle: "ᱚᱱᱟ ᱠᱟᱱᱩᱱᱤ ᱵᱟᱝ ᱦᱩᱭ",
+          steps: [
+            { title: "ᱠᱟᱱᱩᱱ ᱢᱮᱱᱟᱭ", points: ["BNSS 173: FIR ᱚᱞ ᱦᱩᱭ ᱦᱩᱭ.", "Zero FIR ᱫᱚᱦᱚ ᱦᱩᱭ."] },
+            { title: "SP ᱨᱮ ᱪᱟᱞᱟᱣ", points: ["ᱪᱤᱴᱷᱤ ᱥᱤᱠᱟᱭᱟᱛ ᱫᱚᱦᱚ.", "7 ᱫᱤᱱ ᱨᱮ ᱵᱟᱝ ᱦᱩᱭ ᱫᱚ ᱢᱮᱡᱤᱥᱴᱨᱮᱴ ᱨᱮ ᱪᱟᱞᱟᱣ."],
+              call: [{label:"NALSA", num:"15100"}] }
+          ]
+        }
+      },
+      {
+        id: "domestic-violence", audience: "india",
+        en: { icon: "🏠", title: "Domestic violence at home", subtitle: "You are protected by the DV Act 2005",
+          steps: [
+            { title: "Get to safety first", points: ["Move to a safe room or a trusted neighbour/relative.", "Call Women Helpline 181 — they will arrange shelter if needed.", "If hurt — go to nearest hospital, get medical record (free)."] },
+            { title: "File a complaint", points: ["Domestic Violence Act 2005 — Protection Order under Sec 18, Residence Order under Sec 19.", "Approach Protection Officer (every district has one) or Magistrate directly.", "Free One Stop Centre (Sakhi) in every district — call 181."] },
+            { title: "Document everything", points: ["Photos of injuries (date-stamped).", "Save threatening messages, voice notes.", "Get neighbour/witness statements in writing."] },
+            { title: "You have the right to stay in the matrimonial home", points: ["You CANNOT be thrown out — DV Act guarantees Right to Residence.", "Protection Order can be obtained the SAME DAY in urgent cases."],
+              call: [{label:"Women Helpline", num:"181"}, {label:"Police", num:"112"}, {label:"NALSA", num:"15100"}] }
+          ]
+        },
+        hi: { icon: "🏠", title: "घरेलू हिंसा", subtitle: "DV Act 2005 आपकी रक्षा करता है",
+          steps: [
+            { title: "पहले सुरक्षा", points: ["सुरक्षित कमरे में जाएं या भरोसेमंद पड़ोसी/रिश्तेदार के पास।", "महिला हेल्पलाइन 181 पर कॉल — वे आश्रय का इंतज़ाम करेंगे।", "चोट हो — अस्पताल जाकर मुफ्त मेडिकल रिकॉर्ड बनवाएं।"] },
+            { title: "शिकायत दर्ज करें", points: ["DV Act 2005 — धारा 18 संरक्षण आदेश, धारा 19 निवास आदेश।", "प्रोटेक्शन ऑफिसर या सीधे मजिस्ट्रेट के पास।", "हर जिले में मुफ्त वन स्टॉप सेंटर (सखी)।"] },
+            { title: "सबूत रखें", points: ["चोट की तारीख वाली फोटो।", "धमकी भरे मैसेज, वॉइस नोट सेव।", "गवाहों के लिखित बयान।"] },
+            { title: "आपको ससुराल में रहने का अधिकार है", points: ["आपको निकाला नहीं जा सकता — DV Act में निवास का अधिकार।", "आपात स्थिति में संरक्षण आदेश उसी दिन मिल सकता है।"],
+              call: [{label:"महिला हेल्पलाइन", num:"181"}, {label:"पुलिस", num:"112"}, {label:"NALSA", num:"15100"}] }
+          ]
+        },
+        te: { icon: "🏠", title: "గృహ హింస", subtitle: "DV Act 2005 మిమ్మల్ని రక్షిస్తుంది",
+          steps: [
+            { title: "మొదట భద్రత", points: ["సురక్షితమైన గదికి లేదా నమ్మకమైన పొరుగువారి దగ్గరకు వెళ్లండి.", "మహిళా హెల్ప్‌లైన్ 181కి కాల్ చేయండి.", "గాయపడితే — ఆసుపత్రికి వెళ్లి ఉచిత మెడికల్ రికార్డు పొందండి."] },
+            { title: "ఫిర్యాదు దాఖలు", points: ["DV Act 2005 — సెక్షన్ 18 రక్షణ ఆదేశం, సెక్షన్ 19 నివాస ఆదేశం.", "ప్రొటెక్షన్ ఆఫీసర్ లేదా నేరుగా మేజిస్ట్రేట్‌ను సంప్రదించండి.", "ప్రతి జిల్లాలో ఉచిత వన్ స్టాప్ సెంటర్ (సఖి)."] },
+            { title: "ప్రతిదీ నమోదు", points: ["గాయాల తేదీతో ఫోటోలు.", "బెదిరింపు సందేశాలు సేవ్ చేయండి."] },
+            { title: "మీకు ఇంట్లో ఉండే హక్కు ఉంది", points: ["మిమ్మల్ని బయటికి పంపలేరు — DV Act నివాస హక్కు.", "అత్యవసర సందర్భాల్లో అదే రోజు రక్షణ ఆదేశం."],
+              call: [{label:"మహిళా హెల్ప్‌లైన్", num:"181"}, {label:"పోలీస్", num:"112"}, {label:"NALSA", num:"15100"}] }
+          ]
+        },
+        kn: { icon: "🏠", title: "ಕೌಟುಂಬಿಕ ಹಿಂಸಾಚಾರ", subtitle: "DV ಕಾಯ್ದೆ 2005 ನಿಮ್ಮನ್ನು ರಕ್ಷಿಸುತ್ತದೆ",
+          steps: [
+            { title: "ಮೊದಲು ಸುರಕ್ಷತೆ", points: ["ಸುರಕ್ಷಿತ ಸ್ಥಳಕ್ಕೆ ಹೋಗಿ.", "ಮಹಿಳಾ ಸಹಾಯವಾಣಿ 181ಗೆ ಕರೆ ಮಾಡಿ.", "ಗಾಯಗೊಂಡರೆ — ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ ಉಚಿತ ವೈದ್ಯಕೀಯ ದಾಖಲೆ ಪಡೆಯಿರಿ."] },
+            { title: "ದೂರು ದಾಖಲಿಸಿ", points: ["DV ಕಾಯ್ದೆ 2005 — ಸೆಕ್ಷನ್ 18, 19.", "ಪ್ರೊಟೆಕ್ಷನ್ ಆಫೀಸರ್ ಅಥವಾ ಮ್ಯಾಜಿಸ್ಟ್ರೇಟ್.", "ಪ್ರತಿ ಜಿಲ್ಲೆಯಲ್ಲಿ ಉಚಿತ ಒನ್ ಸ್ಟಾಪ್ ಸೆಂಟರ್ (ಸಖಿ)."] },
+            { title: "ಎಲ್ಲವೂ ದಾಖಲಿಸಿ", points: ["ಗಾಯಗಳ ದಿನಾಂಕದ ಫೋಟೋ.", "ಬೆದರಿಕೆ ಸಂದೇಶಗಳು ಉಳಿಸಿ."] },
+            { title: "ನಿಮಗೆ ಮನೆಯಲ್ಲಿ ಉಳಿಯುವ ಹಕ್ಕು ಇದೆ", points: ["ನಿಮ್ಮನ್ನು ಹೊರಗೆ ಎಸೆಯಲಾಗದು — DV ಕಾಯ್ದೆಯಲ್ಲಿ ನಿವಾಸ ಹಕ್ಕು."],
+              call: [{label:"ಮಹಿಳಾ ಸಹಾಯವಾಣಿ", num:"181"}, {label:"ಪೊಲೀಸ್", num:"112"}, {label:"NALSA", num:"15100"}] }
+          ]
+        },
+        sat: { icon: "🏠", title: "ᱚᱲᱟᱜ ᱨᱮ ᱦᱤᱝᱥᱟ", subtitle: "DV Act 2005 ᱨᱮᱠᱷᱟ ᱮᱢᱟᱢᱟ",
+          steps: [
+            { title: "ᱢᱟᱲᱟᱝ ᱨᱮᱠᱷᱟ", points: ["ᱨᱮᱠᱷᱟᱭ ᱴᱷᱟᱸᱣ ᱨᱮ ᱪᱟᱞᱟᱣ.", "ᱢᱟᱭᱟᱢ ᱦᱮᱞᱯᱞᱟᱭᱤᱱ 181 ᱪᱤᱠᱟᱹ."] },
+            { title: "ᱥᱤᱠᱟᱭᱟᱛ ᱫᱚᱦᱚ", points: ["DV ᱫᱷᱟᱨᱟ 18, 19.", "ᱢᱟᱦᱟᱸ ᱯᱷᱳᱴᱚ ᱫᱚᱦᱚ."],
+              call: [{label:"ᱢᱟᱭᱟᱢ ᱦᱮᱞᱯᱞᱟᱭᱤᱱ", num:"181"}, {label:"ᱯᱩᱞᱤᱥ", num:"112"}] }
+          ]
+        }
+      },
+      {
+        id: "fraud", audience: "india",
+        en: { icon: "💻", title: "I was scammed / online fraud", subtitle: "Act in the first hour to recover money",
+          steps: [
+            { title: "Call 1930 within 1 hour — money can be FROZEN", points: ["1930 is the National Cyber Crime Helpline.", "If you call within 1 hour of fraud — bank can freeze the transaction.", "Keep your bank statement, screenshots, transaction ID ready."] },
+            { title: "File on cybercrime.gov.in", points: ["Go to cybercrime.gov.in and file complaint with all evidence.", "Save the acknowledgment number — you will need it."] },
+            { title: "Inform your bank IMMEDIATELY", points: ["Call your bank and request transaction reversal.", "RBI: zero liability if you report unauthorized transaction within 3 working days.", "Get written confirmation from the bank."] },
+            { title: "File FIR if amount is large", points: ["Go to local cyber cell or police station.", "Bring all evidence — screenshots, bank SMS, call logs."],
+              call: [{label:"Cybercrime", num:"1930"}, {label:"Financial Fraud", num:"155260"}, {label:"Police", num:"112"}] }
+          ]
+        },
+        hi: { icon: "💻", title: "मेरे साथ धोखाधड़ी / ऑनलाइन फ्रॉड", subtitle: "पैसा वापस पाने के लिए पहले घंटे में काम करें",
+          steps: [
+            { title: "1 घंटे में 1930 पर कॉल — पैसा रोका जा सकता है", points: ["1930 राष्ट्रीय साइबर अपराध हेल्पलाइन है।", "1 घंटे में कॉल करने पर बैंक ट्रांज़ैक्शन रोक सकता है।", "बैंक स्टेटमेंट, स्क्रीनशॉट, ट्रांज़ैक्शन ID तैयार रखें।"] },
+            { title: "cybercrime.gov.in पर शिकायत", points: ["सबूत के साथ शिकायत दर्ज करें।", "Acknowledgment नंबर सुरक्षित रखें।"] },
+            { title: "तुरंत बैंक को बताएं", points: ["बैंक से ट्रांज़ैक्शन रिवर्स कराने को कहें।", "RBI: 3 कार्यदिवस में रिपोर्ट करने पर शून्य देयता।", "बैंक से लिखित पुष्टि लें।"] },
+            { title: "बड़ी रकम पर FIR दर्ज करें", points: ["स्थानीय साइबर सेल या थाने जाएं।", "सारे सबूत साथ ले जाएं।"],
+              call: [{label:"साइबर अपराध", num:"1930"}, {label:"वित्तीय धोखाधड़ी", num:"155260"}, {label:"पुलिस", num:"112"}] }
+          ]
+        },
+        te: { icon: "💻", title: "నాకు మోసం జరిగింది / ఆన్‌లైన్ ఫ్రాడ్", subtitle: "డబ్బు తిరిగి పొందడానికి మొదటి గంటలో చర్య",
+          steps: [
+            { title: "1 గంటలో 1930కి కాల్ — డబ్బు ఫ్రీజ్ అవుతుంది", points: ["1930 జాతీయ సైబర్ క్రైమ్ హెల్ప్‌లైన్.", "1 గంటలో కాల్ చేస్తే బ్యాంక్ లావాదేవీ ఫ్రీజ్ చేస్తుంది.", "బ్యాంక్ స్టేట్‌మెంట్, స్క్రీన్‌షాట్, ట్రాన్సాక్షన్ ID సిద్ధంగా ఉంచండి."] },
+            { title: "cybercrime.gov.inలో నమోదు", points: ["సాక్ష్యాలతో ఫిర్యాదు దాఖలు చేయండి.", "Acknowledgment నంబర్ ఉంచండి."] },
+            { title: "వెంటనే బ్యాంకుకు తెలియజేయండి", points: ["లావాదేవీ రివర్స్ చేయమని కోరండి.", "RBI: 3 పని దినాల్లో రిపోర్ట్ చేస్తే zero liability."] },
+            { title: "పెద్ద మొత్తానికి FIR", points: ["స్థానిక సైబర్ సెల్‌కు వెళ్లండి."],
+              call: [{label:"సైబర్ క్రైమ్", num:"1930"}, {label:"ఆర్థిక మోసం", num:"155260"}] }
+          ]
+        },
+        kn: { icon: "💻", title: "ನನಗೆ ವಂಚನೆ / ಆನ್‌ಲೈನ್ ಫ್ರಾಡ್", subtitle: "ಹಣ ಮರಳಿ ಪಡೆಯಲು ಮೊದಲ ಗಂಟೆಯಲ್ಲಿ ಕ್ರಮ",
+          steps: [
+            { title: "1 ಗಂಟೆಯಲ್ಲಿ 1930ಗೆ ಕರೆ", points: ["1930 ರಾಷ್ಟ್ರೀಯ ಸೈಬರ್ ಕ್ರೈಮ್ ಸಹಾಯವಾಣಿ.", "1 ಗಂಟೆಯಲ್ಲಿ ಕರೆ ಮಾಡಿದರೆ ಬ್ಯಾಂಕ್ ವಹಿವಾಟನ್ನು ಫ್ರೀಜ್ ಮಾಡಬಹುದು.", "ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್, ಸ್ಕ್ರೀನ್‌ಶಾಟ್, ವಹಿವಾಟು ID ಸಿದ್ಧ ಇರಲಿ."] },
+            { title: "cybercrime.gov.inನಲ್ಲಿ ದೂರು", points: ["ಸಾಕ್ಷಿಗಳೊಂದಿಗೆ ದೂರು ದಾಖಲಿಸಿ.", "Acknowledgment ಸಂಖ್ಯೆ ಉಳಿಸಿ."] },
+            { title: "ತಕ್ಷಣ ಬ್ಯಾಂಕಿಗೆ ತಿಳಿಸಿ", points: ["ವಹಿವಾಟನ್ನು ಹಿಂದಿರುಗಿಸಲು ಕೇಳಿ.", "RBI: 3 ಕೆಲಸದ ದಿನಗಳಲ್ಲಿ ವರದಿ ಮಾಡಿದರೆ zero liability."] },
+            { title: "ದೊಡ್ಡ ಮೊತ್ತಕ್ಕೆ FIR", points: ["ಸ್ಥಳೀಯ ಸೈಬರ್ ಸೆಲ್‌ಗೆ ಹೋಗಿ."],
+              call: [{label:"ಸೈಬರ್ ಕ್ರೈಮ್", num:"1930"}, {label:"ಹಣಕಾಸಿನ ವಂಚನೆ", num:"155260"}] }
+          ]
+        },
+        sat: { icon: "💻", title: "ᱪᱷᱳᱱᱫᱷᱟᱲ / ᱚᱱᱞᱟᱭᱤᱱ ᱯᱷᱨᱟᱰ", subtitle: "ᱢᱟᱨᱟᱝ 1 ᱴᱟᱲᱟᱝ ᱨᱮ ᱪᱤᱠᱟᱹ",
+          steps: [
+            { title: "1930 ᱨᱮ ᱯᱷᱳᱱ ᱪᱤᱠᱟᱹ", points: ["1 ᱴᱟᱲᱟᱝ ᱨᱮ ᱯᱷᱳᱱ ᱪᱤᱠᱟᱹ ᱫᱚ ᱴᱟᱠᱟ ᱫᱚᱦᱚ ᱦᱩᱭ.", "ᱵᱮᱝᱠ ᱨᱮᱭᱟᱜ ᱱᱚᱢᱵᱚᱨ ᱫᱚᱦᱚ."] },
+            { title: "ᱵᱮᱝᱠ ᱨᱮ ᱢᱮᱱᱟᱭ", points: ["3 ᱫᱤᱱ ᱨᱮ ᱨᱤᱯᱳᱨᱴ ᱫᱚᱦᱚ."],
+              call: [{label:"ᱥᱟᱭᱵᱚᱨ ᱠᱨᱟᱭᱤᱢ", num:"1930"}] }
+          ]
+        }
+      },
+      // ════ UKRAINE / EU SCENARIOS ════
+      {
+        id: "uk-border", audience: "ukraine",
+        en: { icon: "🛂", title: "Problem at the EU border", subtitle: "Your right to seek protection cannot be denied",
+          steps: [
+            { title: "Clearly state your intent", points: ["Say in English: 'I am seeking protection / temporary protection.'", "Show your Ukrainian passport or any ID — even expired.", "Without biometric passport — you can STILL seek asylum (international law)."] },
+            { title: "Demand an interpreter", points: ["You have the right to an Ukrainian interpreter (free).", "Do not sign anything you cannot read."],
+              warn: "Don't sign documents in a language you don't understand — they may be voluntary return forms." },
+            { title: "If denied entry / pushback", points: ["Document everything — names, time, badge numbers, photos.", "Contact UNHCR immediately.", "File complaint with Frontex Fundamental Rights Officer."] },
+            { title: "If detained", points: ["You have the right to a lawyer & contact with UNHCR.", "Detention must be reviewed by a court — challenge it."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "🛂", title: "Проблема на кордоні ЄС", subtitle: "Ваше право шукати захист не може бути заперечене",
+          steps: [
+            { title: "Чітко заявіть про намір", points: ["Скажіть англійською: 'I am seeking protection / temporary protection.'", "Покажіть паспорт України або будь-який документ — навіть прострочений.", "Без біометричного паспорта — ви ВСЕ ОДНО можете просити притулок (міжнародне право)."] },
+            { title: "Вимагайте перекладача", points: ["Ви маєте право на безкоштовного україномовного перекладача.", "Не підписуйте нічого, чого не можете прочитати."],
+              warn: "Не підписуйте документи мовою, якої не розумієте — це можуть бути форми добровільного повернення." },
+            { title: "Якщо відмовили у в'їзді / pushback", points: ["Зафіксуйте все — імена, час, номери жетонів, фото.", "Негайно зверніться до УВКБ ООН.", "Подайте скаргу до Frontex Fundamental Rights Officer."] },
+            { title: "У разі затримання", points: ["Ви маєте право на адвоката та контакт з УВКБ ООН.", "Затримання має переглянути суд — оскаржуйте його."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      },
+      {
+        id: "uk-arrest", audience: "ukraine",
+        en: { icon: "👮", title: "Police stopped me / I am detained", subtitle: "Your rights in any EU country",
+          steps: [
+            { title: "Stay calm, ask: 'Why?'", points: ["Police MUST tell you the reason for the stop or arrest.", "Ask for officer name & ID number.", "Show your residence permit / Temporary Protection certificate."] },
+            { title: "Demand an interpreter & lawyer", points: ["You have the right to a Ukrainian interpreter — FREE.", "You have the right to free legal aid in all EU countries.", "Do not answer questions until your lawyer arrives."],
+              warn: "Do NOT sign anything in a language you don't understand." },
+            { title: "Inform UNHCR / your consulate", points: ["You have the right to inform your consulate or UNHCR.", "Ask the police to make this call for you."] },
+            { title: "Detention has limits", points: ["EU law: detention must be the shortest possible duration.", "You have the right to challenge detention in court."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "👮", title: "Поліція мене зупинила / затримали", subtitle: "Ваші права у будь-якій країні ЄС",
+          steps: [
+            { title: "Зберігайте спокій, запитайте: 'Чому?'", points: ["Поліція ПОВИННА сказати причину зупинки чи арешту.", "Запитайте ім'я офіцера та номер посвідчення.", "Покажіть посвідку на проживання / посвідчення тимчасового захисту."] },
+            { title: "Вимагайте перекладача та адвоката", points: ["Ви маєте право на українського перекладача — БЕЗКОШТОВНО.", "У всіх країнах ЄС — право на безкоштовну юридичну допомогу.", "Не відповідайте на питання до прибуття адвоката."],
+              warn: "НЕ підписуйте нічого мовою, якої не розумієте." },
+            { title: "Повідомте УВКБ ООН / консульство", points: ["Ви маєте право повідомити консульство або УВКБ ООН.", "Попросіть поліцію зробити цей дзвінок."] },
+            { title: "Затримання має межі", points: ["Право ЄС: затримання має бути якомога коротшим.", "Ви маєте право оскаржити затримання в суді."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      },
+      {
+        id: "uk-employer", audience: "ukraine",
+        en: { icon: "💼", title: "Employer not paying my wages", subtitle: "EU law protects ALL workers including refugees",
+          steps: [
+            { title: "Document everything", points: ["Save contract, work hours, payslips, messages.", "Even WITHOUT a written contract — you have rights.", "Ask coworkers as witnesses."] },
+            { title: "Contact the National Labour Inspectorate", points: ["FREE complaint — every EU country has one.", "Poland: Państwowa Inspekcja Pracy. Germany: Zoll. Czech: SÚIP.", "Equal pay & minimum wage applies to ALL workers regardless of nationality."],
+              warn: "Wage theft is a crime — your migration status does NOT affect your rights." },
+            { title: "Join a trade union", points: ["EU Charter Article 12: ALL workers can join unions.", "Unions provide free legal advice and review contracts."] },
+            { title: "Free legal aid", points: ["UNHCR partners offer free legal aid for refugees.", "Local NGOs (Caritas, Red Cross) help with employment disputes."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "💼", title: "Роботодавець не платить зарплату", subtitle: "Право ЄС захищає УСІХ працівників, включно з біженцями",
+          steps: [
+            { title: "Задокументуйте все", points: ["Збережіть контракт, графік роботи, розрахункові листи, повідомлення.", "Навіть БЕЗ письмового контракту — ви маєте права.", "Залучіть колег як свідків."] },
+            { title: "Зверніться до Національної інспекції праці", points: ["БЕЗКОШТОВНА скарга — у кожній країні ЄС є.", "Польща: Państwowa Inspekcja Pracy. Німеччина: Zoll. Чехія: SÚIP.", "Рівна оплата та мінімальна зарплата застосовуються до УСІХ працівників."],
+              warn: "Крадіжка зарплати — злочин. Ваш міграційний статус НЕ впливає на ваші права." },
+            { title: "Вступіть до профспілки", points: ["Хартія ЄС стаття 12: УСІ працівники можуть вступати до профспілок.", "Профспілки надають безкоштовну юридичну консультацію."] },
+            { title: "Безкоштовна юридична допомога", points: ["Партнери УВКБ ООН надають безкоштовну допомогу біженцям.", "Місцеві НУО (Caritas, Червоний Хрест) допомагають у трудових спорах."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      },
+      {
+        id: "uk-eviction", audience: "ukraine",
+        en: { icon: "🏘", title: "Landlord wants to evict me", subtitle: "You are protected by tenant law in every EU country",
+          steps: [
+            { title: "You CANNOT be evicted overnight", points: ["EU country law requires written notice (1-3 months) and usually a court order.", "Illegal eviction (changing locks, removing belongings) is a CRIME.", "Tenant rights apply to ALL residents regardless of nationality."],
+              warn: "If landlord cuts utilities or changes locks — call police 112 immediately." },
+            { title: "Read the eviction notice carefully", points: ["Note the deadline — you have time to respond.", "If no written notice — eviction is invalid."] },
+            { title: "Get free housing advice", points: ["Local NGO housing helpline (Caritas, Red Cross, IRC).", "UNHCR partners give free advice in Ukrainian.", "info4ukraine.eu lists country-specific resources."] },
+            { title: "If facing emergency homelessness", points: ["Social services MUST offer alternative accommodation.", "UNHCR and local refugee centres provide emergency shelter."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "🏘", title: "Орендодавець хоче мене виселити", subtitle: "Вас захищає закон про оренду в кожній країні ЄС",
+          steps: [
+            { title: "Вас НЕ МОЖНА виселити за одну ніч", points: ["Закон ЄС вимагає письмового повідомлення (1-3 місяці) і зазвичай рішення суду.", "Незаконне виселення (зміна замків, винос речей) — ЗЛОЧИН.", "Права орендаря застосовуються до УСІХ резидентів."],
+              warn: "Якщо орендодавець відключає комунальні чи змінює замки — негайно дзвоніть 112." },
+            { title: "Уважно прочитайте повідомлення", points: ["Зверніть увагу на термін — у вас є час відповісти.", "Без письмового повідомлення виселення недійсне."] },
+            { title: "Отримайте безкоштовну консультацію", points: ["Місцева житлова гаряча лінія НУО (Caritas, Червоний Хрест, IRC).", "Партнери УВКБ ООН надають безкоштовну консультацію українською.", "info4ukraine.eu — ресурси по країнах."] },
+            { title: "У разі екстреної бездомності", points: ["Соціальні служби ЗОБОВ'ЯЗАНІ запропонувати альтернативне житло.", "УВКБ ООН та місцеві центри біженців надають екстрений притулок."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      },
+      {
+        id: "uk-documents", audience: "ukraine",
+        en: { icon: "📑", title: "I lost my documents / passport", subtitle: "What to do — without panic",
+          steps: [
+            { title: "Report the loss", points: ["Go to the nearest police station — get an official loss certificate.", "Keep a copy of this certificate — you'll need it."] },
+            { title: "Contact your consulate", points: ["Ukrainian consulate can issue an emergency travel document.", "Bring photos and any document copies (even old)."] },
+            { title: "Inform local authorities", points: ["Tell the office that issued your Temporary Protection.", "Apply for a duplicate residence permit."],
+              warn: "Loss of documents does NOT cancel your Temporary Protection — your status remains valid." },
+            { title: "While waiting for new documents", points: ["You CANNOT be deported only because of missing documents.", "Show police your loss certificate or temporary status proof."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "📑", title: "Я втратив документи / паспорт", subtitle: "Що робити — без паніки",
+          steps: [
+            { title: "Повідомте про втрату", points: ["Зверніться до найближчого відділення поліції — отримайте офіційну довідку про втрату.", "Зберігайте копію цієї довідки — вона знадобиться."] },
+            { title: "Зверніться до консульства", points: ["Консульство України може видати екстрений проїзний документ.", "Принесіть фото та будь-які копії документів (навіть старі)."] },
+            { title: "Повідомте місцеві органи", points: ["Сповістіть установу, яка видавала вам тимчасовий захист.", "Подайте заяву на дублікат посвідки."],
+              warn: "Втрата документів НЕ скасовує ваш тимчасовий захист — статус залишається дійсним." },
+            { title: "Поки чекаєте на нові документи", points: ["Вас НЕ МОЖНА депортувати лише через відсутність документів.", "Покажіть поліції довідку про втрату або підтвердження статусу."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      },
+      {
+        id: "uk-medical", audience: "ukraine",
+        en: { icon: "🏥", title: "I need medical care / cannot pay", subtitle: "EU guarantees healthcare under Temporary Protection",
+          steps: [
+            { title: "Emergency? Call 112 — FREE everywhere in EU", points: ["112 works without SIM card or balance.", "Emergency care CANNOT be denied to anyone.", "Hospital must treat you regardless of insurance or status."] },
+            { title: "Register with the local health system", points: ["Show your Temporary Protection certificate.", "You'll get a health card or registration that allows free / subsidised care.", "Each country: e.g. Germany — Krankenversicherung; Poland — NFZ."] },
+            { title: "Pregnancy & children", points: ["Maternity care fully covered.", "Children get free vaccinations through public health system."] },
+            { title: "Mental health support", points: ["Free counselling through MSF, Médecins du Monde, local NGOs.", "Many EU countries have dedicated Ukrainian-language hotlines."],
+              call: [{label:"EU Emergency", num:"112"}, {label:"UNHCR", num:"+41227398111"}] }
+          ]
+        },
+        uk: { icon: "🏥", title: "Мені потрібна медична допомога / я не можу платити", subtitle: "ЄС гарантує медичну допомогу за тимчасового захисту",
+          steps: [
+            { title: "Екстрений випадок? 112 — БЕЗКОШТОВНО всюди в ЄС", points: ["112 працює без SIM-карти чи балансу.", "Екстрена допомога НЕ МОЖЕ бути відмовлена нікому.", "Лікарня повинна вас лікувати незалежно від страховки чи статусу."] },
+            { title: "Зареєструйтесь у місцевій системі охорони здоров'я", points: ["Покажіть посвідчення тимчасового захисту.", "Отримаєте медичну картку або реєстрацію — безкоштовна / субсидована допомога.", "Кожна країна: Німеччина — Krankenversicherung; Польща — NFZ."] },
+            { title: "Вагітність і діти", points: ["Допомога у зв'язку з вагітністю повністю покрита.", "Діти отримують безкоштовні щеплення через державну систему."] },
+            { title: "Підтримка психічного здоров'я", points: ["Безкоштовне консультування через MSF, Médecins du Monde, місцеві НУО.", "Багато країн ЄС мають українськомовні гарячі лінії."],
+              call: [{label:"Екстрена ЄС", num:"112"}, {label:"УВКБ ООН", num:"+41227398111"}] }
+          ]
+        }
+      }
+    ];
+
+    /* ── Render ─────────────────────────────────────────────────────────── */
+    let currentLang = localStorage.getItem('dharma_lang') || 'en';
+
+    function t(key) {
+        return (UI[currentLang] || UI.en)[key] || UI.en[key];
+    }
+
+    // For Indian guides: fall back to English content when regional translation missing.
+    // For Ukrainian guides: only show on uk/en.
+    function getGuideContent(guide, lang) {
+        if (guide[lang]) return guide[lang];
+        // Fallback chain: lang -> en
+        return guide.en || null;
+    }
+
+    function shouldShowGuide(guide, lang) {
+        if (lang === 'uk') return guide.audience === 'ukraine';
+        return guide.audience === 'india';
+    }
+
+    function renderLangButtons() {
+        const row = document.getElementById('lang-row');
+        row.innerHTML = '';
+        Object.keys(LANG_NAMES).forEach(code => {
+            const b = document.createElement('button');
+            b.className = 'lang-btn' + (code === currentLang ? ' active' : '');
+            b.textContent = LANG_NAMES[code];
+            b.onclick = () => {
+                currentLang = code;
+                localStorage.setItem('dharma_lang', code);
+                renderAll();
+            };
+            row.appendChild(b);
+        });
+    }
+
+    function renderUI() {
+        document.documentElement.lang = currentLang;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = t(key);
+        });
+        document.getElementById('search').placeholder = t('searchPlaceholder');
+    }
+
+    function renderGuides(query = '') {
+        const list = document.getElementById('guides-list');
+        const empty = document.getElementById('empty');
+        list.innerHTML = '';
+        const q = query.trim().toLowerCase();
+
+        const visible = GUIDES.filter(g => shouldShowGuide(g, currentLang));
+        let count = 0;
+
+        visible.forEach(g => {
+            const c = getGuideContent(g, currentLang);
+            if (!c) return;
+            const haystack = (c.title + ' ' + (c.subtitle||'') + ' ' + JSON.stringify(c.steps)).toLowerCase();
+            if (q && !haystack.includes(q)) return;
+            count++;
+
+            const det = document.createElement('details');
+            det.className = 'scenario';
+
+            const sum = document.createElement('summary');
+            sum.innerHTML = `
+                <span class="icon">${c.icon}</span>
+                <span class="title-block">
+                    <span>${c.title}</span>
+                    <div class="subtitle">${c.subtitle || ''}</div>
+                </span>
+            `;
+            det.appendChild(sum);
+
+            const body = document.createElement('div');
+            body.className = 'body';
+
+            c.steps.forEach((s, i) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step';
+                let html = `<span class="step-num">${i+1}</span><span class="step-title">${s.title}</span>`;
+                if (s.points && s.points.length) {
+                    html += '<ul>' + s.points.map(p => `<li>${p}</li>`).join('') + '</ul>';
+                }
+                if (s.warn) {
+                    html += `<div class="warn"><strong>${t('warnLabel')}:</strong> ${s.warn}</div>`;
+                }
+                if (s.call && s.call.length) {
+                    const links = s.call.map(c => `<a href="tel:${c.num}">${c.label} ${c.num}</a>`).join('');
+                    html += `<div class="call"><strong>${t('callLabel')}</strong> ${links}</div>`;
+                }
+                stepDiv.innerHTML = html;
+                body.appendChild(stepDiv);
+            });
+
+            det.appendChild(body);
+            list.appendChild(det);
+        });
+
+        empty.style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function renderAll() {
+        renderLangButtons();
+        renderUI();
+        renderGuides(document.getElementById('search').value);
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+        renderGuides(e.target.value);
+    });
+
+    renderAll();
+
+    // Register service worker so this page is cached for offline use
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    }
+    </script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

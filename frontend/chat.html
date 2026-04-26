@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat — DHARMA-NYAYA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+</head>
+<body class="antialiased h-screen flex flex-col">
+    <!-- Top Nav -->
+    <nav class="nav-glass w-full z-50 flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent" data-i18n="appName">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold" data-i18n="navSOS">🚨 SOS</a>
+                    <a href="/quiz" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navKnowRights">Know Your Rights</a>
+                    <a href="/legal-aid" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navLegalAid">Legal Aid</a>
+                    <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition font-medium">⚖️ Legal Tools</a>
+                    <a href="/spot-the-trap" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🔍 Spot the Trap</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" class="bg-transparent border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                    <a href="/dashboard" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="viewDashboard">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Chat Area -->
+    <div class="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+        <!-- Messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-6 space-y-2">
+            <!-- Welcome message -->
+            <div class="flex justify-start mb-4">
+                <div class="assistant-row">
+                    <div class="avatar-container">
+                        <img class="avatar-img" src="/images/chat_icon.png" alt="AI" width="48" height="48" style="width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;object-fit:cover;border:3px solid #6366f1;" />
+                    </div>
+                    <div class="chat-bubble assistant">
+                        <p class="font-semibold text-indigo-600 mb-1">⚖️ DHARMA-NYAYA</p>
+                        <p data-i18n="welcomeMsg">Welcome! I'm your AI legal assistant. I can help you:</p>
+                        <ul class="mt-2 ml-4 list-disc text-sm space-y-1">
+                            <li data-i18n="welcomeRights">Understand your legal rights</li>
+                            <li data-i18n="welcomeDocs">Analyze legal documents (upload images/PDFs)</li>
+                            <li data-i18n="welcomeActions">Generate complaint letters, RTI applications, and legal notices</li>
+                            <li data-i18n="welcomeTrack">Track your case progress</li>
+                        </ul>
+                        <p class="mt-2 text-sm text-gray-500" data-i18n="welcomeLang">You can type in any supported language — I'll respond in the same language.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Upload Panel (toggleable) -->
+        <div id="upload-panel" class="hidden px-4 pb-4">
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg" data-i18n="uploadFile">Upload Document</h3>
+                    <button onclick="document.getElementById('upload-panel').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div id="drop-zone" class="drop-zone">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-gray-500" data-i18n="dragDrop">Drag & drop your document here, or click to browse</p>
+                    <p class="text-sm text-gray-400 mt-2" data-i18n="supportedFiles">Supports JPG, PNG, PDF (max 10MB)</p>
+                    <input id="file-input" type="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
+                </div>
+                <div id="analysis-loading" class="hidden mt-4 text-center">
+                    <div class="inline-flex items-center space-x-2">
+                        <svg class="animate-spin h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span class="text-indigo-600 font-medium" data-i18n="analyzing">Analyzing your document...</span>
+                    </div>
+                </div>
+                <!-- Analysis Result -->
+                <div id="analysis-result" class="hidden mt-6 space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-indigo-600 mb-1" data-i18n="summary">Summary</h4>
+                        <p id="analysis-summary" class="text-sm bg-gray-50 p-3 rounded-xl"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-red-600 mb-1" data-i18n="risks">Risks</h4>
+                        <div id="analysis-risks" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-purple-600 mb-1" data-i18n="keyClauses">Key Clauses</h4>
+                        <ul id="analysis-clauses" class="text-sm list-disc ml-4"></ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-emerald-600 mb-1" data-i18n="advice">Advice</h4>
+                        <p id="analysis-advice" class="text-sm bg-emerald-50 p-3 rounded-xl"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="flex-shrink-0 px-4 pb-4">
+            <div class="flex items-end space-x-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-2">
+                <!-- Upload button -->
+                <button onclick="document.getElementById('upload-panel').classList.toggle('hidden')" class="p-3 rounded-xl hover:bg-gray-100 transition text-gray-500" title="Upload Document">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                    </svg>
+                </button>
+                <!-- Download PDF report -->
+                <button onclick="downloadPDFReport()" id="pdf-btn" class="p-3 rounded-xl hover:bg-gray-100 transition text-gray-500" title="Download PDF Report">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </button>
+                <!-- Voice button -->
+                <button id="mic-btn" onclick="toggleVoiceInput()" class="p-3 rounded-xl hover:bg-gray-100 transition text-gray-500" title="Voice Input">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                </button>
+                <!-- Mute/Unmute auto-speak toggle -->
+                <button id="mute-btn" onclick="toggleMute()" class="p-3 rounded-xl hover:bg-gray-100 transition text-gray-500" title="Mute Auto-Speak">
+                    <svg id="mute-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>
+                    </svg>
+                    <svg id="mute-icon-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                    </svg>
+                </button>
+                <!-- Text input -->
+                <textarea id="chat-input" rows="1"
+                    class="flex-1 resize-none border-0 focus:ring-0 focus:outline-none text-base px-2 py-2.5 max-h-32"
+                    data-i18n="chatPlaceholder" placeholder="Describe your legal issue..."></textarea>
+                <!-- Send button -->
+                <button onclick="sendMessage()" class="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

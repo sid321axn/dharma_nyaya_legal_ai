@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Aid Near You — DHARMA-NYAYA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+</head>
+<body class="antialiased min-h-screen bg-gray-50">
+    <!-- Top Nav -->
+    <nav class="nav-glass w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/chat" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navChat">Chat</a>
+                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold" data-i18n="navSOS">🚨 SOS</a>
+                    <a href="/quiz" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navKnowRights">Know Your Rights</a>
+                    <a href="/spot-the-trap" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🔍 Spot the Trap</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" class="bg-transparent border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">
+                <span class="text-4xl">📍</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">Legal Aid Near You</h1>
+            <p class="text-gray-500 text-lg max-w-2xl mx-auto">Find free Legal Services Authorities, courts, and legal aid NGOs near your location.</p>
+        </div>
+
+        <!-- Location & Search -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                <button onclick="detectLocation()" id="detect-btn" class="flex items-center justify-center space-x-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>Detect My Location</span>
+                </button>
+                <div class="text-gray-400 text-center sm:text-left">or</div>
+                <div class="flex-1 flex gap-2">
+                    <input id="location-input" type="text" placeholder="Enter your city or district..." class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                    <button onclick="searchByCity()" class="px-5 py-3 bg-gray-800 text-white font-semibold rounded-xl hover:bg-gray-900 transition">Search</button>
+                </div>
+            </div>
+            <div id="location-status" class="mt-3 text-sm text-gray-500 hidden"></div>
+        </div>
+
+        <!-- Map -->
+        <div id="map-container" class="w-full h-96 rounded-2xl overflow-hidden border border-gray-200 shadow-sm mb-8 bg-gray-100 flex items-center justify-center">
+            <div id="map-placeholder" class="text-center">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                <p class="text-gray-400">Click "Detect My Location" or search a city to see nearby legal aid centers</p>
+            </div>
+            <div id="map" class="w-full h-full hidden"></div>
+        </div>
+
+        <!-- Results list -->
+        <div id="results-container" class="hidden">
+            <h2 class="text-xl font-bold text-gray-700 mb-4" id="results-heading">Legal Aid Centers Near You</h2>
+            <div id="results-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- State-wise DLSA Directory -->
+        <div class="mt-10">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">📋 State Legal Services Authorities Directory</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Delhi SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">Patiala House Courts, New Delhi</p>
+                    <a href="tel:011-23384781" class="text-sm text-indigo-500 hover:underline">📞 011-23384781</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Maharashtra SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Mumbai</p>
+                    <a href="tel:022-22620334" class="text-sm text-indigo-500 hover:underline">📞 022-22620334</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Karnataka SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Bengaluru</p>
+                    <a href="tel:080-22110674" class="text-sm text-indigo-500 hover:underline">📞 080-22110674</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Tamil Nadu SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Chennai</p>
+                    <a href="tel:044-25357946" class="text-sm text-indigo-500 hover:underline">📞 044-25357946</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Uttar Pradesh SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Lucknow</p>
+                    <a href="tel:0522-2209370" class="text-sm text-indigo-500 hover:underline">📞 0522-2209370</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">West Bengal SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Kolkata</p>
+                    <a href="tel:033-22483027" class="text-sm text-indigo-500 hover:underline">📞 033-22483027</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Rajasthan SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Jodhpur</p>
+                    <a href="tel:0291-2650478" class="text-sm text-indigo-500 hover:underline">📞 0291-2650478</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Gujarat SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Ahmedabad</p>
+                    <a href="tel:079-27680935" class="text-sm text-indigo-500 hover:underline">📞 079-27680935</a>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition">
+                    <h3 class="font-semibold text-indigo-700">Telangana SLSA</h3>
+                    <p class="text-xs text-gray-400 mt-1">High Court, Hyderabad</p>
+                    <a href="tel:040-23446816" class="text-sm text-indigo-500 hover:underline">📞 040-23446816</a>
+                </div>
+            </div>
+            <p class="text-sm text-gray-400 mt-4 text-center">For the complete list, visit <a href="https://nalsa.gov.in" target="_blank" rel="noopener" class="text-indigo-500 hover:underline">nalsa.gov.in</a> or call <strong>15100</strong> (toll-free Legal Aid Helpline)</p>
+        </div>
+    </main>
+
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+        let map = null;
+        let markers = [];
+        let userLat = null, userLng = null;
+
+        // Load Google Maps dynamically (using OpenStreetMap as fallback)
+        function initMap(lat, lng) {
+            const mapDiv = document.getElementById('map');
+            const placeholder = document.getElementById('map-placeholder');
+            placeholder.classList.add('hidden');
+            mapDiv.classList.remove('hidden');
+
+            // Use an iframe with OpenStreetMap (no API key needed)
+            mapDiv.innerHTML = `<iframe
+                width="100%" height="100%" frameborder="0" scrolling="no"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.05}%2C${lat-0.05}%2C${lng+0.05}%2C${lat+0.05}&layer=mapnik&marker=${lat}%2C${lng}"
+                style="border:0"
+            ></iframe>`;
+        }
+
+        function detectLocation() {
+            const btn = document.getElementById('detect-btn');
+            const status = document.getElementById('location-status');
+            status.classList.remove('hidden');
+            status.textContent = '📡 Detecting your location...';
+            btn.disabled = true;
+
+            if (!navigator.geolocation) {
+                status.textContent = '❌ Geolocation not supported by your browser';
+                btn.disabled = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    status.innerHTML = `✅ Location detected: <strong>${userLat.toFixed(4)}, ${userLng.toFixed(4)}</strong>`;
+                    btn.disabled = false;
+
+                    initMap(userLat, userLng);
+                    await searchNearby(userLat, userLng);
+                },
+                (err) => {
+                    status.textContent = `❌ Location error: ${err.message}. Please search by city instead.`;
+                    btn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        async function searchByCity() {
+            const city = document.getElementById('location-input').value.trim();
+            if (!city) return;
+
+            const status = document.getElementById('location-status');
+            status.classList.remove('hidden');
+            status.textContent = `🔍 Searching for legal aid centers in ${city}...`;
+
+            try {
+                // Geocode city using Nominatim (free, no API key)
+                const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ' India')}&format=json&limit=1`);
+                const results = await resp.json();
+
+                if (results.length === 0) {
+                    status.textContent = `❌ Could not find "${city}". Try a different spelling.`;
+                    return;
+                }
+
+                userLat = parseFloat(results[0].lat);
+                userLng = parseFloat(results[0].lon);
+                status.innerHTML = `✅ Found: <strong>${results[0].display_name}</strong>`;
+
+                initMap(userLat, userLng);
+                await searchNearby(userLat, userLng, city);
+            } catch (err) {
+                status.textContent = `❌ Search failed: ${err.message}`;
+            }
+        }
+
+        async function searchNearby(lat, lng, cityName) {
+            const container = document.getElementById('results-container');
+            const list = document.getElementById('results-list');
+            const heading = document.getElementById('results-heading');
+
+            container.classList.remove('hidden');
+            heading.textContent = cityName
+                ? `Legal Aid Centers in ${cityName}`
+                : 'Legal Aid Centers Near You';
+
+            // Search OpenStreetMap Overpass API for legal/judicial facilities nearby
+            const radius = 15000; // 15km radius
+            const query = `[out:json][timeout:15];(
+                node["amenity"="courthouse"](around:${radius},${lat},${lng});
+                node["office"="lawyer"](around:${radius},${lat},${lng});
+                node["amenity"="legal_aid"](around:${radius},${lat},${lng});
+                node["office"="ngo"](around:${radius},${lat},${lng});
+                way["amenity"="courthouse"](around:${radius},${lat},${lng});
+            );out body 20;`;
+
+            try {
+                const resp = await fetch('https://overpass-api.de/api/interpreter', {
+                    method: 'POST',
+                    body: `data=${encodeURIComponent(query)}`,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                });
+                const data = await resp.json();
+
+                const places = (data.elements || []).map(el => ({
+                    name: el.tags?.name || el.tags?.['name:en'] || 'Legal Aid Center',
+                    type: el.tags?.amenity || el.tags?.office || 'legal',
+                    address: el.tags?.['addr:full'] || el.tags?.['addr:street'] || '',
+                    phone: el.tags?.phone || el.tags?.['contact:phone'] || '',
+                    lat: el.lat || el.center?.lat,
+                    lng: el.lon || el.center?.lon,
+                }));
+
+                if (places.length === 0) {
+                    list.innerHTML = `
+                        <div class="col-span-full text-center py-10">
+                            <p class="text-gray-400 text-lg mb-4">No results found from map data in this area.</p>
+                            <p class="text-gray-500">Don't worry! Every district in India has a <strong>District Legal Services Authority (DLSA)</strong>.</p>
+                            <div class="mt-4 inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-200 px-5 py-3 rounded-xl">
+                                <span class="text-2xl">📞</span>
+                                <div>
+                                    <p class="font-bold text-indigo-700">Call NALSA Helpline: 15100</p>
+                                    <p class="text-sm text-indigo-500">Toll-free, available in all languages</p>
+                                </div>
+                            </div>
+                        </div>`;
+                    // Also show DLSA suggestion
+                    addDLSASuggestions(list, cityName || 'your area');
+                    return;
+                }
+
+                list.innerHTML = places.map((p, i) => `
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg transition-all">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-xl ${typeColor(p.type)} flex items-center justify-center flex-shrink-0">
+                                <span class="text-xl">${typeIcon(p.type)}</span>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800">${escapeHtml(p.name)}</h3>
+                                <p class="text-sm text-gray-400 capitalize">${p.type.replace(/_/g, ' ')}</p>
+                                ${p.address ? `<p class="text-sm text-gray-500 mt-1">📍 ${escapeHtml(p.address)}</p>` : ''}
+                                ${p.phone ? `<a href="tel:${p.phone}" class="text-sm text-indigo-500 hover:underline mt-1 inline-block">📞 ${escapeHtml(p.phone)}</a>` : ''}
+                                ${p.lat ? `<a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=17/${p.lat}/${p.lng}" target="_blank" rel="noopener" class="text-xs text-gray-400 hover:text-indigo-500 mt-1 inline-block ml-2">Open in Map →</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                list.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-400">Could not fetch nearby places. Please try again.</p>
+                        <p class="text-sm text-gray-400 mt-2">Meanwhile, call <strong>15100</strong> (NALSA Helpline) for free legal aid.</p>
+                    </div>`;
+            }
+        }
+
+        function addDLSASuggestions(list, area) {
+            const extra = document.createElement('div');
+            extra.className = 'col-span-full mt-4';
+            extra.innerHTML = `
+                <h3 class="font-semibold text-gray-600 mb-3">💡 Try searching for:</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="document.getElementById('location-input').value='District Court ${area}';searchByCity()" class="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-indigo-100 transition">"District Court ${escapeHtml(area)}"</button>
+                    <button onclick="document.getElementById('location-input').value='Legal Services Authority ${area}';searchByCity()" class="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-indigo-100 transition">"Legal Services Authority ${escapeHtml(area)}"</button>
+                    <button onclick="document.getElementById('location-input').value='High Court';searchByCity()" class="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-indigo-100 transition">"High Court"</button>
+                </div>`;
+            list.appendChild(extra);
+        }
+
+        function typeIcon(type) {
+            const icons = { courthouse: '🏛️', lawyer: '⚖️', legal_aid: '🤝', ngo: '🏢' };
+            return icons[type] || '📌';
+        }
+        function typeColor(type) {
+            const colors = { courthouse: 'bg-indigo-100', lawyer: 'bg-purple-100', legal_aid: 'bg-green-100', ngo: 'bg-amber-100' };
+            return colors[type] || 'bg-gray-100';
+        }
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter key on input
+        document.addEventListener('DOMContentLoaded', () => {
+            const inp = document.getElementById('location-input');
+            if (inp) inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchByCity(); });
+        });
+    </script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

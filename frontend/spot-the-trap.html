@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHARMA-NYAYA — Spot the Trap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .trap-card { animation: trapSlide 0.4s ease-out both; }
+        .trap-card:nth-child(2) { animation-delay: 0.08s; }
+        .trap-card:nth-child(3) { animation-delay: 0.16s; }
+        .trap-card:nth-child(4) { animation-delay: 0.24s; }
+        .trap-card:nth-child(5) { animation-delay: 0.32s; }
+        @keyframes trapSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes scanLine {
+            0% { top: 0; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scan-line {
+            position: absolute; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #ef4444, transparent);
+            animation: scanLine 2s ease-in-out infinite;
+        }
+        .risk-gauge-fill { transition: width 1s cubic-bezier(.4,0,.2,1); }
+        textarea { resize: vertical; }
+    </style>
+</head>
+<body class="antialiased min-h-screen bg-gray-50">
+    <!-- Nav -->
+    <nav class="nav-glass fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/chat" class="text-sm text-gray-500 hover:text-indigo-600 transition">Chat</a>
+                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🚨 SOS</a>
+                    <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition">⚖️ Legal Tools</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" class="bg-transparent border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="pt-16">
+        <div class="bg-gradient-to-r from-red-600 via-rose-600 to-orange-500 py-8 px-4">
+            <div class="max-w-5xl mx-auto text-center">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">🔍 Spot the Trap</h1>
+                <p class="text-rose-100 text-sm sm:text-base max-w-2xl mx-auto">Paste your contract, rental agreement, or any legal document — our AI will find every unfair clause, hidden risk, and missing protection.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Mode Toggle -->
+        <div class="flex items-center justify-center mb-6 gap-3">
+            <button id="mode-review" onclick="setMode('review')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-red-600 text-white shadow">
+                🔎 Review My Document
+            </button>
+            <button id="mode-compare" onclick="setMode('compare')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-gray-100 text-gray-600 hover:bg-gray-200">
+                ⚖️ Compare Two Documents
+            </button>
+        </div>
+
+        <!-- Input Area -->
+        <div id="input-area" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Document A -->
+            <div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-sm">📄</span>
+                        <h3 class="font-bold text-gray-800">Your Document</h3>
+                        <span class="text-xs text-red-500 font-medium">(Under Review)</span>
+                    </div>
+                    <textarea id="doc-a" rows="10" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent leading-relaxed" placeholder="Paste your rental agreement, employment contract, loan agreement, or any legal document here..."></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="doc-a-count" class="text-xs text-gray-400">0 characters</span>
+                        <div class="flex items-center gap-3">
+                            <button onclick="loadSample('a')" class="text-xs text-indigo-500 hover:text-indigo-700 transition">Load sample</button>
+                            <label class="cursor-pointer flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 transition font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Upload PDF / Word
+                                <input type="file" accept=".pdf,.docx" class="hidden" onchange="uploadFile(this, 'a')">
+                            </label>
+                        </div>
+                    </div>
+                    <div id="file-a-info" class="hidden mt-2 flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                        <span class="text-xs text-red-600">📎 <span id="file-a-name"></span></span>
+                        <button onclick="clearFile('a')" class="text-xs text-red-400 hover:text-red-600">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document B (compare mode) -->
+            <div id="doc-b-panel" class="hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center text-sm">📋</span>
+                        <h3 class="font-bold text-gray-800">Fair Reference</h3>
+                        <span class="text-xs text-green-600 font-medium">(Template / Standard)</span>
+                    </div>
+                    <textarea id="doc-b" rows="10" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-400 focus:border-transparent leading-relaxed" placeholder="Paste a fair/standard version of the document for comparison (optional)..."></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="doc-b-count" class="text-xs text-gray-400">0 characters</span>
+                        <div class="flex items-center gap-3">
+                            <button onclick="loadSample('b')" class="text-xs text-indigo-500 hover:text-indigo-700 transition">Load sample</button>
+                            <label class="cursor-pointer flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-700 transition font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Upload PDF / Word
+                                <input type="file" accept=".pdf,.docx" class="hidden" onchange="uploadFile(this, 'b')">
+                            </label>
+                        </div>
+                    </div>
+                    <div id="file-b-info" class="hidden mt-2 flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                        <span class="text-xs text-green-600">📎 <span id="file-b-name"></span></span>
+                        <button onclick="clearFile('b')" class="text-xs text-green-400 hover:text-green-600">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doc Type + Submit (takes the right column in review mode) -->
+            <div id="controls-panel">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-full flex flex-col justify-between">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
+                        <select id="doc-type" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-red-400 mb-4">
+                            <option value="">Auto-detect</option>
+                            <option value="Rental / Lease Agreement">Rental / Lease Agreement</option>
+                            <option value="Employment Contract">Employment Contract</option>
+                            <option value="Loan Agreement">Loan Agreement</option>
+                            <option value="Service Agreement">Service Agreement</option>
+                            <option value="Non-Disclosure Agreement">NDA / Non-Disclosure</option>
+                            <option value="Sale Deed">Sale Deed / Property</option>
+                            <option value="Partnership Agreement">Partnership Agreement</option>
+                            <option value="Terms and Conditions">Terms &amp; Conditions</option>
+                            <option value="Insurance Policy">Insurance Policy</option>
+                            <option value="Freelance Contract">Freelance / Gig Contract</option>
+                        </select>
+
+                        <div class="bg-red-50 border border-red-100 rounded-xl p-4 mb-4">
+                            <h4 class="text-sm font-semibold text-red-700 mb-2">🛡️ What we check for:</h4>
+                            <ul class="text-xs text-red-600 space-y-1">
+                                <li>• Unfair / exploitative clauses</li>
+                                <li>• One-sided termination rights</li>
+                                <li>• Hidden penalties &amp; forfeiture terms</li>
+                                <li>• Missing protections (security deposit refund, notice period, etc.)</li>
+                                <li>• Ambiguous language that could be misused</li>
+                                <li>• Violations of Indian contract law &amp; consumer rights</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button id="analyze-btn" onclick="analyzeDocument()" class="w-full py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold text-sm hover:from-red-700 hover:to-rose-700 transition shadow-lg shadow-red-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Scan for Traps
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden">
+            <div class="bg-white rounded-2xl shadow-md border border-red-100 p-8 text-center relative overflow-hidden">
+                <div class="scan-line"></div>
+                <div class="mb-4">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-red-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <p id="loading-status" class="text-lg font-semibold text-red-600 mb-1">Scanning your document...</p>
+                <p id="loading-sub" class="text-sm text-gray-400">Our AI is reading every clause with a magnifying glass</p>
+                <div class="mt-4 flex justify-center gap-1">
+                    <div class="w-2 h-2 bg-red-400 rounded-full animate-bounce" style="animation-delay:0s"></div>
+                    <div class="w-2 h-2 bg-red-400 rounded-full animate-bounce" style="animation-delay:0.15s"></div>
+                    <div class="w-2 h-2 bg-red-400 rounded-full animate-bounce" style="animation-delay:0.3s"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden space-y-6">
+            <!-- Risk Gauge -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Analysis Result</h2>
+                        <p id="result-summary" class="text-sm text-gray-500 mt-1"></p>
+                    </div>
+                    <div id="risk-badge" class="px-4 py-2 rounded-full text-sm font-bold"></div>
+                </div>
+                <!-- Gauge bar -->
+                <div class="mb-3">
+                    <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                        <span>Safe</span>
+                        <span>Risk Score: <strong id="risk-score-text" class="text-gray-700">0</strong>/100</span>
+                        <span>Dangerous</span>
+                    </div>
+                    <div class="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
+                        <div id="risk-gauge" class="risk-gauge-fill h-full rounded-full" style="width:0%"></div>
+                    </div>
+                </div>
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-3 mt-4">
+                    <div class="bg-red-50 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold text-red-600" id="trap-count">0</p>
+                        <p class="text-xs text-red-500">Traps Found</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold text-amber-600" id="missing-count">0</p>
+                        <p class="text-xs text-amber-600">Missing Protections</p>
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-3 text-center">
+                        <p class="text-2xl font-bold text-green-600" id="safe-count">0</p>
+                        <p class="text-xs text-green-600">Safe Clauses</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traps -->
+            <div id="traps-section" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">🚩</span>
+                    Traps &amp; Unfair Clauses
+                </h3>
+                <div id="traps-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Missing Protections -->
+            <div id="missing-section" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-sm">⚠️</span>
+                    Missing Protections
+                </h3>
+                <div id="missing-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Safe Clauses -->
+            <div id="safe-section" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-sm">✅</span>
+                    Safe Clauses
+                </h3>
+                <div id="safe-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Recommendations -->
+            <div id="reco-section" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-sm">💡</span>
+                    Recommendations
+                </h3>
+                <div id="reco-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Legal References -->
+            <div id="legal-section" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-sm">📚</span>
+                    Relevant Laws
+                </h3>
+                <div id="legal-list" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- Citation Verification + Sources (Google Search Grounded via Gemini Flash) -->
+            <div id="grounding-section" class="hidden"></div>
+
+            <!-- Scan Again -->
+            <div class="text-center pt-2 pb-8">
+                <button onclick="resetAll()" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-600 transition">
+                    ← Scan Another Document
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentMode = 'review';
+
+    function getLang() {
+        return document.getElementById('lang-select').value || 'en';
+    }
+
+    // ── Mode Toggle ─────────────────────────────────────────────────
+
+    function setMode(mode) {
+        currentMode = mode;
+        const reviewBtn = document.getElementById('mode-review');
+        const compareBtn = document.getElementById('mode-compare');
+        const docBPanel = document.getElementById('doc-b-panel');
+        const controlsPanel = document.getElementById('controls-panel');
+
+        if (mode === 'compare') {
+            reviewBtn.className = 'px-5 py-2 rounded-xl text-sm font-semibold transition bg-gray-100 text-gray-600 hover:bg-gray-200';
+            compareBtn.className = 'px-5 py-2 rounded-xl text-sm font-semibold transition bg-red-600 text-white shadow';
+            docBPanel.classList.remove('hidden');
+            // In compare mode, controls go full width below
+            controlsPanel.classList.remove('lg:col-span-1');
+        } else {
+            reviewBtn.className = 'px-5 py-2 rounded-xl text-sm font-semibold transition bg-red-600 text-white shadow';
+            compareBtn.className = 'px-5 py-2 rounded-xl text-sm font-semibold transition bg-gray-100 text-gray-600 hover:bg-gray-200';
+            docBPanel.classList.add('hidden');
+        }
+    }
+
+    // ── Character Count ─────────────────────────────────────────────
+
+    // ── File Upload ─────────────────────────────────────────────────
+
+    async function uploadFile(input, which) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['pdf', 'docx'].includes(ext)) {
+            alert('Only PDF and Word (.docx) files are supported.');
+            input.value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File too large. Maximum size is 5 MB.');
+            input.value = '';
+            return;
+        }
+
+        const textarea = document.getElementById('doc-' + which);
+        const countEl = document.getElementById('doc-' + which + '-count');
+        const infoEl = document.getElementById('file-' + which + '-info');
+        const nameEl = document.getElementById('file-' + which + '-name');
+
+        // Show uploading state
+        textarea.value = 'Extracting text from ' + file.name + '...';
+        textarea.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const resp = await fetch('/api/compare/extract', { method: 'POST', body: formData });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.detail || 'Upload failed');
+            }
+            const data = await resp.json();
+            textarea.value = data.text;
+            countEl.textContent = data.characters + ' characters';
+            nameEl.textContent = data.filename + ' (' + data.characters + ' chars)';
+            infoEl.classList.remove('hidden');
+        } catch (e) {
+            alert('Could not extract text: ' + e.message);
+            textarea.value = '';
+            countEl.textContent = '0 characters';
+        } finally {
+            textarea.disabled = false;
+            input.value = '';
+        }
+    }
+
+    function clearFile(which) {
+        document.getElementById('doc-' + which).value = '';
+        document.getElementById('doc-' + which + '-count').textContent = '0 characters';
+        document.getElementById('file-' + which + '-info').classList.add('hidden');
+    }
+
+    document.getElementById('doc-a').addEventListener('input', function() {
+        document.getElementById('doc-a-count').textContent = this.value.length + ' characters';
+    });
+    document.getElementById('doc-b').addEventListener('input', function() {
+        document.getElementById('doc-b-count').textContent = this.value.length + ' characters';
+    });
+
+    // ── Sample Data ─────────────────────────────────────────────────
+
+    const SAMPLE_UNFAIR = `RENTAL AGREEMENT
+
+This Rental Agreement is entered into on this 1st day of January 2026 between:
+LANDLORD: Mr. Rajesh Kumar, Address: 45 MG Road, Delhi
+TENANT: [Your Name], Address: [Your Address]
+
+1. RENT: The monthly rent shall be Rs. 25,000/- payable on or before the 1st of each month. A late fee of Rs. 500 per day shall apply for any delay.
+
+2. SECURITY DEPOSIT: The Tenant shall pay a security deposit of Rs. 3,00,000/- (12 months rent). The deposit shall be refunded at the sole discretion of the Landlord.
+
+3. LOCK-IN PERIOD: The Tenant agrees to a lock-in period of 24 months. If the Tenant vacates before 24 months, the entire security deposit shall be forfeited.
+
+4. MAINTENANCE: All maintenance and repair costs, including structural repairs, plumbing, and electrical work, shall be borne entirely by the Tenant.
+
+5. TERMINATION: The Landlord may terminate this agreement at any time with 15 days notice. The Tenant must provide 3 months written notice.
+
+6. RENT INCREASE: The Landlord reserves the right to increase rent at any time during the agreement period without any cap or prior notice.
+
+7. INSPECTION: The Landlord shall have the right to enter and inspect the premises at any time without prior notice.
+
+8. SUBLETTING: The Tenant shall not sublet or allow any other person to stay in the premises. Violation shall result in immediate eviction and forfeiture of deposit.
+
+9. DISPUTES: All disputes shall be resolved in Delhi courts only, at the expense of the Tenant.
+
+10. MODIFICATIONS: The Landlord may modify any terms of this agreement at any time. Continued occupancy implies acceptance.`;
+
+    const SAMPLE_FAIR = `RENTAL AGREEMENT (FAIR VERSION)
+
+This Rental Agreement is entered into on this 1st day of January 2026 between:
+LANDLORD: Mr. Rajesh Kumar, Address: 45 MG Road, Delhi
+TENANT: [Your Name], Address: [Your Address]
+
+1. RENT: Monthly rent of Rs. 25,000/-, payable by the 5th of each month. A grace period of 7 days applies. Late fee shall not exceed Rs. 100 per day, capped at Rs. 1,000/month.
+
+2. SECURITY DEPOSIT: Deposit of Rs. 50,000/- (2 months rent). Refundable within 30 days of vacating, after deducting only documented damages with photographic evidence.
+
+3. LOCK-IN PERIOD: Both parties agree to a 6-month lock-in. After lock-in, either party may terminate with 30 days written notice.
+
+4. MAINTENANCE: Minor repairs (under Rs. 2,000) by Tenant. All major/structural repairs by Landlord. Landlord shall address repair requests within 7 days.
+
+5. TERMINATION: Either party may terminate with 30 days written notice after the lock-in period. Deposit shall be refunded in all cases after damage assessment.
+
+6. RENT INCREASE: Annual rent increase shall not exceed 10% and requires 60 days prior written notice.
+
+7. INSPECTION: Landlord may inspect with 24 hours prior written notice, during reasonable hours, maximum twice a month.
+
+8. GUESTS: Tenant may have guests. Long-term guests (over 30 days) require written notification to Landlord.
+
+9. DISPUTES: Disputes shall first be mediated. If unresolved, either party may approach the Rent Controller or civil court.
+
+10. MODIFICATIONS: No modifications without written consent of both parties.`;
+
+    function loadSample(which) {
+        if (which === 'a') {
+            document.getElementById('doc-a').value = SAMPLE_UNFAIR;
+            document.getElementById('doc-a-count').textContent = SAMPLE_UNFAIR.length + ' characters';
+            document.getElementById('doc-type').value = 'Rental / Lease Agreement';
+        } else {
+            document.getElementById('doc-b').value = SAMPLE_FAIR;
+            document.getElementById('doc-b-count').textContent = SAMPLE_FAIR.length + ' characters';
+        }
+    }
+
+    // ── Loading Messages ────────────────────────────────────────────
+
+    const LOADING_MESSAGES = [
+        { status: 'Scanning your document...', sub: 'Reading every clause with a magnifying glass' },
+        { status: 'Checking for unfair terms...', sub: 'Comparing against standard legal protections' },
+        { status: 'Identifying hidden risks...', sub: 'Looking for ambiguous language and loopholes' },
+        { status: 'Analyzing penalty clauses...', sub: 'Checking if penalties are disproportionate' },
+        { status: 'Verifying legal compliance...', sub: 'Cross-referencing with Indian contract law' },
+        { status: 'Preparing your report...', sub: 'Organizing findings by severity' },
+    ];
+    let loadingInterval = null;
+
+    function startLoadingMessages() {
+        let idx = 0;
+        const update = () => {
+            const msg = LOADING_MESSAGES[idx % LOADING_MESSAGES.length];
+            document.getElementById('loading-status').textContent = msg.status;
+            document.getElementById('loading-sub').textContent = msg.sub;
+            idx++;
+        };
+        update();
+        loadingInterval = setInterval(update, 3500);
+    }
+
+    function stopLoadingMessages() {
+        clearInterval(loadingInterval);
+    }
+
+    // ── Analyze ─────────────────────────────────────────────────────
+
+    async function analyzeDocument() {
+        const docA = document.getElementById('doc-a').value.trim();
+        if (!docA || docA.length < 20) {
+            alert('Please paste your document (at least 20 characters).');
+            return;
+        }
+
+        const btn = document.getElementById('analyze-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Scanning...';
+
+        document.getElementById('results').classList.add('hidden');
+        document.getElementById('loading').classList.remove('hidden');
+        startLoadingMessages();
+
+        try {
+            const body = {
+                doc_a: docA,
+                doc_type: document.getElementById('doc-type').value,
+                language: getLang(),
+            };
+            if (currentMode === 'compare') {
+                body.doc_b = document.getElementById('doc-b').value.trim();
+            }
+
+            const resp = await fetch('/api/compare/compare', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            const data = await resp.json();
+            stopLoadingMessages();
+            document.getElementById('loading').classList.add('hidden');
+            renderResults(data);
+        } catch (e) {
+            stopLoadingMessages();
+            document.getElementById('loading').classList.add('hidden');
+            alert('Analysis failed: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Scan for Traps';
+        }
+    }
+
+    // ── Render Results ──────────────────────────────────────────────
+
+    function renderResults(data) {
+        document.getElementById('results').classList.remove('hidden');
+
+        // Summary
+        document.getElementById('result-summary').textContent = data.summary || '';
+
+        // Risk badge
+        const risk = data.overall_risk || 'medium';
+        const score = data.risk_score || 50;
+        const badge = document.getElementById('risk-badge');
+        const colors = {
+            low: 'bg-green-100 text-green-700',
+            medium: 'bg-amber-100 text-amber-700',
+            high: 'bg-orange-100 text-orange-700',
+            critical: 'bg-red-100 text-red-700',
+        };
+        badge.className = 'px-4 py-2 rounded-full text-sm font-bold ' + (colors[risk] || colors.medium);
+        badge.textContent = risk.toUpperCase() + ' RISK';
+
+        // Risk gauge
+        document.getElementById('risk-score-text').textContent = score;
+        const gaugeColors = {
+            low: 'bg-green-500', medium: 'bg-amber-500',
+            high: 'bg-orange-500', critical: 'bg-red-500',
+        };
+        const gauge = document.getElementById('risk-gauge');
+        gauge.className = 'risk-gauge-fill h-full rounded-full ' + (gaugeColors[risk] || 'bg-amber-500');
+        setTimeout(() => { gauge.style.width = score + '%'; }, 100);
+
+        // Stats
+        const traps = data.traps || [];
+        const missing = data.missing_protections || [];
+        const safe = data.safe_clauses || [];
+        document.getElementById('trap-count').textContent = traps.length;
+        document.getElementById('missing-count').textContent = missing.length;
+        document.getElementById('safe-count').textContent = safe.length;
+
+        // Traps
+        const trapsSection = document.getElementById('traps-section');
+        const trapsList = document.getElementById('traps-list');
+        trapsList.innerHTML = '';
+        if (traps.length > 0) {
+            trapsSection.classList.remove('hidden');
+            traps.forEach((trap, i) => {
+                const riskColors = {
+                    low: 'border-yellow-200 bg-yellow-50',
+                    medium: 'border-amber-200 bg-amber-50',
+                    high: 'border-orange-200 bg-orange-50',
+                    critical: 'border-red-200 bg-red-50',
+                };
+                const dotColors = { low: 'bg-yellow-500', medium: 'bg-amber-500', high: 'bg-orange-500', critical: 'bg-red-500' };
+                const rc = riskColors[trap.risk_level] || riskColors.medium;
+                const dc = dotColors[trap.risk_level] || dotColors.medium;
+
+                trapsList.innerHTML += `
+                    <div class="trap-card border rounded-xl p-4 ${rc}">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1 w-3 h-3 rounded-full ${dc} flex-shrink-0"></span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-bold uppercase ${trap.risk_level === 'critical' ? 'text-red-700' : 'text-orange-700'}">${(trap.risk_level || 'medium').toUpperCase()}</span>
+                                </div>
+                                ${trap.clause ? `<p class="text-sm text-gray-800 bg-white/60 rounded-lg px-3 py-2 mb-2 border border-gray-200 italic">"${escHtml(trap.clause)}"</p>` : ''}
+                                <p class="text-sm font-medium text-gray-800 mb-1">⚠️ ${escHtml(trap.issue || '')}</p>
+                                ${trap.impact ? `<p class="text-xs text-gray-600 mb-2"><strong>Impact:</strong> ${escHtml(trap.impact)}</p>` : ''}
+                                ${trap.fair_version ? `<div class="bg-green-50 border border-green-200 rounded-lg px-3 py-2 mt-2"><p class="text-xs text-green-700"><strong>✅ Fair version:</strong> ${escHtml(trap.fair_version)}</p></div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        } else {
+            trapsSection.classList.add('hidden');
+        }
+
+        // Missing protections
+        const missingSection = document.getElementById('missing-section');
+        const missingList = document.getElementById('missing-list');
+        missingList.innerHTML = '';
+        if (missing.length > 0) {
+            missingSection.classList.remove('hidden');
+            missing.forEach(m => {
+                missingList.innerHTML += `
+                    <div class="trap-card bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <p class="text-sm font-medium text-amber-800 mb-1">${escHtml(m.protection || '')}</p>
+                        ${m.importance ? `<p class="text-xs text-amber-600 mb-2">${escHtml(m.importance)}</p>` : ''}
+                        ${m.standard_clause ? `<div class="bg-white/60 rounded-lg px-3 py-2 border border-amber-100"><p class="text-xs text-gray-700"><strong>Should include:</strong> ${escHtml(m.standard_clause)}</p></div>` : ''}
+                    </div>`;
+            });
+        } else {
+            missingSection.classList.add('hidden');
+        }
+
+        // Safe clauses
+        const safeSection = document.getElementById('safe-section');
+        const safeList = document.getElementById('safe-list');
+        safeList.innerHTML = '';
+        if (safe.length > 0) {
+            safeSection.classList.remove('hidden');
+            safe.forEach(s => {
+                safeList.innerHTML += `<div class="trap-card bg-green-50 border border-green-200 rounded-xl px-4 py-3"><p class="text-sm text-green-700">✅ ${escHtml(s)}</p></div>`;
+            });
+        } else {
+            safeSection.classList.add('hidden');
+        }
+
+        // Recommendations
+        const recoSection = document.getElementById('reco-section');
+        const recoList = document.getElementById('reco-list');
+        recoList.innerHTML = '';
+        const recos = data.recommendations || [];
+        if (recos.length > 0) {
+            recoSection.classList.remove('hidden');
+            recos.forEach(r => {
+                recoList.innerHTML += `<div class="trap-card bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3"><p class="text-sm text-indigo-700">💡 ${escHtml(r)}</p></div>`;
+            });
+        } else {
+            recoSection.classList.add('hidden');
+        }
+
+        // Legal references
+        const legalSection = document.getElementById('legal-section');
+        const legalList = document.getElementById('legal-list');
+        legalList.innerHTML = '';
+        const laws = data.legal_references || [];
+        if (laws.length > 0) {
+            legalSection.classList.remove('hidden');
+            laws.forEach(l => {
+                legalList.innerHTML += `<span class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">${escHtml(l)}</span>`;
+            });
+        } else {
+            legalSection.classList.add('hidden');
+        }
+
+        // Citation Verification + Sources (validations & sources from backend grounding pass)
+        if (window.GroundingUI && typeof window.GroundingUI.renderInto === 'function') {
+            window.GroundingUI.renderInto('grounding-section', data.validations || [], data.sources || []);
+        }
+
+        // Scroll to results
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s || '';
+        return d.innerHTML;
+    }
+
+    function resetAll() {
+        document.getElementById('results').classList.add('hidden');
+        document.getElementById('doc-a').value = '';
+        document.getElementById('doc-b').value = '';
+        document.getElementById('doc-a-count').textContent = '0 characters';
+        document.getElementById('doc-b-count').textContent = '0 characters';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    </script>
+    <script src="/assets/js/grounding.js"></script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

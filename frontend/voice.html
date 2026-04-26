@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHARMA-NYAYA — Voice Legal Consultation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* ── Central Orb ── */
+        .voice-orb {
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #818cf8, #6366f1 50%, #4338ca 100%);
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 8px 40px rgba(99, 102, 241, 0.3);
+            transition: all 0.5s cubic-bezier(.4,0,.2,1);
+            cursor: pointer;
+            position: relative;
+        }
+        .voice-orb.idle { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 8px 40px rgba(99,102,241,0.2); }
+        .voice-orb.listening {
+            background: radial-gradient(circle at 40% 35%, #f87171, #ef4444 50%, #dc2626 100%);
+            box-shadow: 0 0 0 20px rgba(239,68,68,0.08), 0 0 60px rgba(239,68,68,0.25);
+            animation: orbPulse 1.5s ease-in-out infinite;
+        }
+        .voice-orb.thinking {
+            background: radial-gradient(circle at 40% 35%, #fbbf24, #f59e0b 50%, #d97706 100%);
+            box-shadow: 0 0 0 12px rgba(245,158,11,0.1), 0 0 40px rgba(245,158,11,0.2);
+            animation: orbSpin 2s linear infinite;
+        }
+        .voice-orb.speaking {
+            background: radial-gradient(circle at 40% 35%, #34d399, #10b981 50%, #059669 100%);
+            box-shadow: 0 0 0 18px rgba(16,185,129,0.1), 0 0 50px rgba(16,185,129,0.25);
+            animation: orbSpeak 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        @keyframes orbSpin {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(30deg); }
+        }
+        @keyframes orbSpeak {
+            0% { transform: scale(1); box-shadow: 0 0 0 12px rgba(16,185,129,0.1), 0 0 40px rgba(16,185,129,0.2); }
+            100% { transform: scale(1.05); box-shadow: 0 0 0 24px rgba(16,185,129,0.08), 0 0 60px rgba(16,185,129,0.3); }
+        }
+
+        /* Ripple rings */
+        .ripple-ring {
+            position: absolute; inset: -20px; border-radius: 50%;
+            border: 2px solid rgba(99,102,241,0.15);
+            animation: rippleOut 2.5s ease-out infinite;
+            pointer-events: none;
+        }
+        .ripple-ring:nth-child(2) { animation-delay: 0.8s; }
+        .ripple-ring:nth-child(3) { animation-delay: 1.6s; }
+        .listening .ripple-ring { border-color: rgba(239,68,68,0.15); }
+        .speaking .ripple-ring { border-color: rgba(16,185,129,0.15); }
+        @keyframes rippleOut {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        /* Sound bars visualizer */
+        .sound-bars { display: flex; align-items: center; gap: 3px; height: 40px; }
+        .sound-bar {
+            width: 4px; border-radius: 4px;
+            background: white; opacity: 0.8;
+            animation: soundWave 0.8s ease-in-out infinite alternate;
+        }
+        .sound-bar:nth-child(1) { height: 12px; animation-delay: 0s; }
+        .sound-bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+        .sound-bar:nth-child(3) { height: 28px; animation-delay: 0.2s; }
+        .sound-bar:nth-child(4) { height: 36px; animation-delay: 0.3s; }
+        .sound-bar:nth-child(5) { height: 28px; animation-delay: 0.4s; }
+        .sound-bar:nth-child(6) { height: 20px; animation-delay: 0.5s; }
+        .sound-bar:nth-child(7) { height: 12px; animation-delay: 0.6s; }
+        @keyframes soundWave {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1); }
+        }
+        .voice-orb:not(.listening):not(.speaking) .sound-bars .sound-bar { animation: none; transform: scaleY(0.2); }
+
+        /* Transcript bubble */
+        .transcript-bubble {
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(99,102,241,0.15);
+            transition: all 0.3s ease;
+        }
+        .transcript-bubble.user-bubble { border-color: rgba(239,68,68,0.2); background: rgba(254,242,242,0.85); }
+        .transcript-bubble.ai-bubble { border-color: rgba(16,185,129,0.2); background: rgba(236,253,245,0.85); }
+
+        /* Waveform canvas */
+        #waveform-canvas { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
+
+        /* Floating particles */
+        .particle {
+            position: absolute; width: 4px; height: 4px; border-radius: 50%;
+            background: rgba(99,102,241,0.3); pointer-events: none;
+        }
+
+        /* Status text */
+        .status-glow { text-shadow: 0 0 20px currentColor; }
+
+        /* Conversation history */
+        .history-entry { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive orb */
+        @media (max-width: 640px) {
+            .voice-orb { width: 140px; height: 140px; }
+        }
+    </style>
+</head>
+<body class="antialiased bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 min-h-screen">
+    <!-- Navigation -->
+    <nav class="nav-glass fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/chat" class="text-sm text-gray-500 hover:text-indigo-600 transition">Chat</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🚨 SOS</a>
+                    <a href="/quiz" class="text-sm text-gray-500 hover:text-indigo-600 transition">Know Your Rights</a>
+                    <a href="/legal-aid" class="text-sm text-gray-500 hover:text-indigo-600 transition">Legal Aid</a>
+                    <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition">⚖️ Legal Tools</a>
+                    <a href="/spot-the-trap" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🔍 Spot the Trap</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" onchange="onLangChange()" class="bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="mr">मराठी</option>
+                        <option value="gu">ગુજરાતી</option>
+                        <option value="or">ଓଡ଼ିଆ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-10 flex flex-col items-center min-h-screen">
+        <!-- Header -->
+        <div class="text-center mb-6 px-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full text-xs font-medium text-indigo-600 mb-3">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                Voice-to-Voice Legal Consultation
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">Speak with your AI Legal Advisor</h1>
+            <p class="text-gray-500 text-sm max-w-md mx-auto">Tap the orb and ask your legal question in any language. The AI will listen, analyze, and speak back.</p>
+        </div>
+
+        <!-- Voice Orb -->
+        <div class="relative flex items-center justify-center my-6">
+            <div id="voice-orb" class="voice-orb idle flex items-center justify-center" onclick="toggleVoice()">
+                <div class="ripple-ring"></div>
+                <div class="ripple-ring"></div>
+                <div class="ripple-ring"></div>
+                <canvas id="waveform-canvas"></canvas>
+                <!-- Icon states -->
+                <div id="orb-icon-idle" class="relative z-10 text-white">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                </div>
+                <div id="orb-icon-listening" class="relative z-10 hidden">
+                    <div class="sound-bars">
+                        <div class="sound-bar"></div><div class="sound-bar"></div><div class="sound-bar"></div>
+                        <div class="sound-bar"></div>
+                        <div class="sound-bar"></div><div class="sound-bar"></div><div class="sound-bar"></div>
+                    </div>
+                </div>
+                <div id="orb-icon-thinking" class="relative z-10 hidden text-white">
+                    <svg class="w-12 h-12 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="animation-duration: 3s;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <div id="orb-icon-speaking" class="relative z-10 hidden">
+                    <div class="sound-bars">
+                        <div class="sound-bar"></div><div class="sound-bar"></div><div class="sound-bar"></div>
+                        <div class="sound-bar" style="height:40px"></div>
+                        <div class="sound-bar"></div><div class="sound-bar"></div><div class="sound-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Text -->
+        <div id="status-area" class="text-center mb-6 h-16">
+            <p id="status-text" class="text-lg font-semibold text-indigo-600 status-glow transition-all">Tap to start speaking</p>
+            <p id="status-sub" class="text-sm text-gray-400 mt-1"></p>
+        </div>
+
+        <!-- Live Transcript -->
+        <div id="live-transcript" class="hidden w-full max-w-lg mx-auto px-4 mb-4">
+            <div id="transcript-bubble" class="transcript-bubble rounded-2xl px-5 py-3 shadow-sm">
+                <p class="text-xs font-medium text-gray-400 mb-1" id="transcript-label">You're saying:</p>
+                <p id="transcript-text" class="text-gray-700 text-sm leading-relaxed"></p>
+            </div>
+        </div>
+
+        <!-- Agent Steps (during thinking) -->
+        <div id="agent-steps" class="hidden w-full max-w-lg mx-auto px-4 mb-4">
+            <div class="bg-white/90 backdrop-blur rounded-2xl px-5 py-4 shadow-sm border border-amber-100">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <p class="text-xs font-semibold text-amber-700 tracking-wide uppercase">AI is working</p>
+                </div>
+                <div id="step-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- AI Response Bubble -->
+        <div id="ai-response-area" class="hidden w-full max-w-lg mx-auto px-4 mb-4">
+            <div class="transcript-bubble ai-bubble rounded-2xl px-5 py-4 shadow-sm">
+                <p class="text-xs font-medium text-emerald-600 mb-1">⚖️ AI Legal Advisor:</p>
+                <p id="ai-response-text" class="text-gray-700 text-sm leading-relaxed"></p>
+            </div>
+        </div>
+
+        <!-- Conversation History (collapsed) -->
+        <div id="history-section" class="hidden w-full max-w-lg mx-auto px-4 mt-4">
+            <button onclick="toggleHistory()" class="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition mb-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <span id="history-toggle-text">Show conversation history</span>
+            </button>
+            <div id="history-list" class="hidden space-y-3 max-h-80 overflow-y-auto pr-2"></div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t border-gray-100 py-3 px-4">
+            <div class="max-w-lg mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <!-- Stop button -->
+                    <button id="stop-btn" onclick="stopEverything()" class="hidden px-4 py-2 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200 transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        Stop
+                    </button>
+                    <!-- Auto-listen toggle -->
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="auto-listen" checked class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-xs text-gray-500">Auto-listen after response</span>
+                    </label>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                    <span id="turn-count">0</span> turns
+                    <span class="mx-1">·</span>
+                    <span id="session-lang">EN</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // VOICE-TO-VOICE CONSULTATION ENGINE
+    // ═══════════════════════════════════════════════════════════════════
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    // State machine: idle → listening → processing → speaking → idle (or → listening if auto)
+    let state = 'idle';
+    let sessionId = 'voice_' + Date.now();
+    let turnCount = 0;
+    let conversationHistory = [];
+
+    // Audio
+    let audioCtx = null;
+    let activeSource = null;
+
+    // Speech recognition
+    let recognition = null;
+    let finalTranscript = '';
+    let interimTranscript = '';
+    let silenceTimer = null;
+    const SILENCE_TIMEOUT = 2000; // 2s silence = done speaking
+
+    const LANG_MAP = {
+        en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN',
+        te: 'te-IN', kn: 'kn-IN', mr: 'hi-IN', gu: 'hi-IN',
+        or: 'hi-IN', sat: 'hi-IN', uk: 'uk-UA',
+    };
+
+    // ── Helpers ──────────────────────────────────────────────────────
+
+    function getLang() {
+        return document.getElementById('lang-select').value || 'en';
+    }
+
+    function onLangChange() {
+        document.getElementById('session-lang').textContent = getLang().toUpperCase();
+    }
+
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+
+    function unlockAudio() {
+        try {
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') ctx.resume();
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf; src.connect(ctx.destination); src.start(0);
+        } catch(e) {}
+    }
+
+    // ── State Machine ───────────────────────────────────────────────
+
+    function setState(newState) {
+        state = newState;
+        const orb = document.getElementById('voice-orb');
+        const icons = ['idle', 'listening', 'thinking', 'speaking'];
+        icons.forEach(s => {
+            document.getElementById('orb-icon-' + s).classList.toggle('hidden', s !== newState);
+        });
+        orb.className = 'voice-orb ' + newState + ' flex items-center justify-center';
+
+        const statusText = document.getElementById('status-text');
+        const statusSub = document.getElementById('status-sub');
+        const stopBtn = document.getElementById('stop-btn');
+
+        switch(newState) {
+            case 'idle':
+                statusText.textContent = 'Tap to start speaking';
+                statusText.className = 'text-lg font-semibold text-indigo-600 status-glow transition-all';
+                statusSub.textContent = '';
+                stopBtn.classList.add('hidden');
+                document.getElementById('live-transcript').classList.add('hidden');
+                document.getElementById('agent-steps').classList.add('hidden');
+                break;
+            case 'listening':
+                statusText.textContent = 'Listening...';
+                statusText.className = 'text-lg font-semibold text-red-500 status-glow transition-all';
+                statusSub.textContent = 'Speak your legal question clearly';
+                stopBtn.classList.remove('hidden');
+                document.getElementById('live-transcript').classList.remove('hidden');
+                document.getElementById('transcript-bubble').className = 'transcript-bubble user-bubble rounded-2xl px-5 py-3 shadow-sm';
+                document.getElementById('transcript-label').textContent = "You're saying:";
+                document.getElementById('ai-response-area').classList.add('hidden');
+                break;
+            case 'processing':
+                // Map to thinking orb
+                orb.className = 'voice-orb thinking flex items-center justify-center';
+                document.getElementById('orb-icon-listening').classList.add('hidden');
+                document.getElementById('orb-icon-thinking').classList.remove('hidden');
+                statusText.textContent = 'Analyzing your question...';
+                statusText.className = 'text-lg font-semibold text-amber-600 status-glow transition-all';
+                statusSub.textContent = 'AI agents are working on your case';
+                document.getElementById('live-transcript').classList.add('hidden');
+                document.getElementById('agent-steps').classList.remove('hidden');
+                document.getElementById('step-list').innerHTML = '';
+                break;
+            case 'speaking':
+                statusText.textContent = 'AI is responding...';
+                statusText.className = 'text-lg font-semibold text-emerald-600 status-glow transition-all';
+                statusSub.textContent = 'Listen to the legal advice';
+                stopBtn.classList.remove('hidden');
+                document.getElementById('agent-steps').classList.add('hidden');
+                document.getElementById('ai-response-area').classList.remove('hidden');
+                break;
+        }
+    }
+
+    // ── Main Toggle ─────────────────────────────────────────────────
+
+    function toggleVoice() {
+        unlockAudio();
+        if (state === 'idle') {
+            startListening();
+        } else if (state === 'listening') {
+            stopListening();
+        } else if (state === 'speaking') {
+            stopSpeaking();
+            setState('idle');
+        }
+    }
+
+    function stopEverything() {
+        if (recognition) { try { recognition.abort(); } catch(e){} recognition = null; }
+        clearTimeout(silenceTimer);
+        stopSpeaking();
+        setState('idle');
+    }
+
+    // ── Speech Recognition ──────────────────────────────────────────
+
+    function startListening() {
+        if (!SpeechRecognition) {
+            alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+            return;
+        }
+
+        finalTranscript = '';
+        interimTranscript = '';
+        document.getElementById('transcript-text').textContent = '';
+        setState('listening');
+
+        recognition = new SpeechRecognition();
+        recognition.lang = LANG_MAP[getLang()] || 'en-IN';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (e) => {
+            clearTimeout(silenceTimer);
+            let interim = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                if (e.results[i].isFinal) {
+                    finalTranscript += e.results[i][0].transcript + ' ';
+                } else {
+                    interim += e.results[i][0].transcript;
+                }
+            }
+            interimTranscript = interim;
+            document.getElementById('transcript-text').textContent = finalTranscript + interim;
+
+            // Reset silence timer — if no new speech for SILENCE_TIMEOUT, auto-send
+            silenceTimer = setTimeout(() => {
+                if (finalTranscript.trim().length > 2) {
+                    stopListening();
+                }
+            }, SILENCE_TIMEOUT);
+        };
+
+        recognition.onend = () => {
+            // If we're still in listening state, it paused — restart
+            if (state === 'listening') {
+                try { recognition.start(); } catch(e) {}
+            }
+        };
+
+        recognition.onerror = (e) => {
+            console.error('Speech error:', e.error);
+            if (e.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone permission.');
+                setState('idle');
+            }
+        };
+
+        try { recognition.start(); } catch(e) { console.error(e); }
+    }
+
+    function stopListening() {
+        clearTimeout(silenceTimer);
+        if (recognition) {
+            try { recognition.stop(); } catch(e) {}
+            recognition = null;
+        }
+        const text = finalTranscript.trim();
+        if (text.length > 2) {
+            sendToAI(text);
+        } else {
+            setState('idle');
+        }
+    }
+
+    // ── Send to AI (SSE streaming) ──────────────────────────────────
+
+    async function sendToAI(message) {
+        setState('processing');
+
+        // Add to history
+        addToHistory('user', message);
+
+        try {
+            const resp = await fetch('/api/chat/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    language: getLang(),
+                    session_id: sessionId,
+                    mode: 'voice',
+                }),
+            });
+
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let fullReply = '';
+            let ttsText = '';
+            let replyLang = getLang();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep incomplete line
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                        const event = JSON.parse(line.slice(6));
+
+                        if (event.type === 'step') {
+                            addAgentStep(event.step, event.status, event.agent);
+                        } else if (event.type === 'done') {
+                            fullReply = event.reply || '';
+                            ttsText = event.tts_text || '';
+                            replyLang = event.language || getLang();
+                        }
+                    } catch(e) {}
+                }
+            }
+
+            if (!fullReply) {
+                setState('idle');
+                return;
+            }
+
+            // Show AI response text
+            document.getElementById('ai-response-text').textContent = fullReply;
+            addToHistory('ai', fullReply);
+            turnCount++;
+            document.getElementById('turn-count').textContent = turnCount;
+
+            // Speak the response
+            if (ttsText) {
+                setState('speaking');
+                await speakResponse(ttsText, replyLang);
+            } else {
+                setState('idle');
+            }
+
+        } catch (e) {
+            console.error('Stream error:', e);
+            setState('idle');
+        }
+    }
+
+    // Friendly labels & icons for the orchestrator's pipeline steps.
+    const STEP_META = {
+        reading:     { icon: '📩', label: 'Reading your message' },
+        detecting:   { icon: '🌐', label: 'Detecting language & topic' },
+        routing:     { icon: '🧭', label: 'Choosing the right expert' },
+        thinking:    { icon: '🧠', label: 'Thinking it through' },
+        translating: { icon: '🔤', label: 'Translating the answer' },
+        preparing:   { icon: '✨', label: 'Preparing your reply' },
+    };
+
+    function addAgentStep(step, status, agent) {
+        const list = document.getElementById('step-list');
+        const meta = STEP_META[step] || { icon: '•', label: step };
+        const isDone = status === 'done';
+        const isActive = status === 'active';
+
+        const stateIcon = isDone
+            ? `<svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`
+            : isActive
+                ? `<svg class="w-3.5 h-3.5 text-amber-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>`
+                : `<span class="block w-2 h-2 rounded-full bg-gray-300"></span>`;
+
+        const rowBg = isActive
+            ? 'bg-amber-50 border-amber-200'
+            : isDone
+                ? 'bg-emerald-50/60 border-emerald-100'
+                : 'bg-gray-50 border-gray-100';
+
+        const labelCls = isDone
+            ? 'text-gray-500 line-through decoration-emerald-300/60'
+            : isActive
+                ? 'text-amber-800 font-medium'
+                : 'text-gray-600';
+
+        const html = `
+            <div class="flex items-center gap-3 px-3 py-2 rounded-xl border ${rowBg} transition-all duration-200">
+                <span class="w-7 h-7 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-base flex-shrink-0">
+                    ${meta.icon}
+                </span>
+                <span class="flex-1 text-sm ${labelCls} truncate">${meta.label}</span>
+                <span class="flex-shrink-0 flex items-center justify-center w-5 h-5">${stateIcon}</span>
+            </div>`;
+
+        const existing = document.getElementById('step-' + step);
+        if (existing) {
+            existing.outerHTML = `<div id="step-${step}">${html}</div>`;
+            return;
+        }
+        const wrap = document.createElement('div');
+        wrap.id = 'step-' + step;
+        wrap.innerHTML = html;
+        list.appendChild(wrap);
+    }
+
+    // ── TTS Playback ────────────────────────────────────────────────
+
+    async function speakResponse(text, language) {
+        try {
+            const resp = await fetch('/api/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, language }),
+            });
+
+            if (!resp.ok || resp.status !== 200) {
+                fallbackSpeak(text, language);
+                return;
+            }
+
+            const arrayBuffer = await resp.arrayBuffer();
+            if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                fallbackSpeak(text, language);
+                return;
+            }
+
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') await ctx.resume();
+
+            ctx.decodeAudioData(arrayBuffer, (audioBuffer) => {
+                if (activeSource) { try { activeSource.stop(); } catch(e){} }
+                const source = ctx.createBufferSource();
+                source.buffer = audioBuffer;
+                const gain = ctx.createGain();
+                gain.gain.value = 1.0;
+                source.connect(gain);
+                gain.connect(ctx.destination);
+                activeSource = source;
+
+                source.onended = () => {
+                    activeSource = null;
+                    onSpeakingDone();
+                };
+                source.start(0);
+            }, (err) => {
+                console.error('Audio decode error:', err);
+                fallbackSpeak(text, language);
+            });
+
+        } catch (e) {
+            console.error('TTS fetch error:', e);
+            fallbackSpeak(text, language);
+        }
+    }
+
+    function fallbackSpeak(text, language) {
+        if (!window.speechSynthesis) { onSpeakingDone(); return; }
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = LANG_MAP[language] || 'en-IN';
+        utterance.rate = 0.95;
+        utterance.onend = () => onSpeakingDone();
+        utterance.onerror = () => onSpeakingDone();
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function stopSpeaking() {
+        if (activeSource) { try { activeSource.stop(); } catch(e){} activeSource = null; }
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+    }
+
+    function onSpeakingDone() {
+        if (state !== 'speaking') return;
+        const autoListen = document.getElementById('auto-listen').checked;
+        if (autoListen) {
+            // Small delay then auto-start listening for next question
+            setTimeout(() => startListening(), 600);
+        } else {
+            setState('idle');
+        }
+    }
+
+    // ── Conversation History ────────────────────────────────────────
+
+    function addToHistory(role, text) {
+        conversationHistory.push({ role, text, time: new Date() });
+        const section = document.getElementById('history-section');
+        section.classList.remove('hidden');
+
+        const list = document.getElementById('history-list');
+        const div = document.createElement('div');
+        div.className = 'history-entry';
+
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (role === 'user') {
+            div.innerHTML = `
+                <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-medium text-red-500">🎤 You</span>
+                        <span class="text-xs text-gray-400">${time}</span>
+                    </div>
+                    <p class="text-sm text-gray-700">${escapeHtml(text)}</p>
+                </div>`;
+        } else {
+            div.innerHTML = `
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-medium text-emerald-600">⚖️ AI Advisor</span>
+                        <span class="text-xs text-gray-400">${time}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(text).substring(0, 500)}${text.length > 500 ? '...' : ''}</p>
+                </div>`;
+        }
+        list.appendChild(div);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function toggleHistory() {
+        const list = document.getElementById('history-list');
+        const text = document.getElementById('history-toggle-text');
+        list.classList.toggle('hidden');
+        text.textContent = list.classList.contains('hidden') ? 'Show conversation history' : 'Hide conversation history';
+    }
+
+    function escapeHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    // ── Init ────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('session-lang').textContent = getLang().toUpperCase();
+
+        // Check browser support
+        if (!SpeechRecognition) {
+            document.getElementById('status-sub').textContent = '⚠️ Voice input not supported — use Chrome or Edge';
+            document.getElementById('status-sub').className = 'text-sm text-red-400 mt-1';
+        }
+    });
+    </script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>

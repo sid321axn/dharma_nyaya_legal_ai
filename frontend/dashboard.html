@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — DHARMA-NYAYA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DharmaNyaya">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+</head>
+<body class="antialiased min-h-screen bg-gray-50">
+    <!-- Top Nav -->
+    <nav class="nav-glass w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent" data-i18n="appName">DHARMA-NYAYA</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/chat" class="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-700 transition" data-i18n="startChat">Start Chat</a>
+                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
+                    <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold" data-i18n="navSOS">🚨 SOS</a>
+                    <a href="/quiz" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navKnowRights">Know Your Rights</a>
+                    <a href="/legal-aid" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navLegalAid">Legal Aid</a>
+                    <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition font-medium">⚖️ Legal Tools</a>
+                    <a href="/spot-the-trap" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🔍 Spot the Trap</a>
+                    <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
+                    <select id="lang-select" class="bg-transparent border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
+                        <option value="sat">Santali / ᱥᱟᱱᱛᱟᱲᱤ</option>
+                        <option value="uk">Українська</option>
+                    </select>
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Cases</p>
+                        <p id="stat-total" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Open</p>
+                        <p id="stat-open" class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">In Progress</p>
+                        <p id="stat-progress" class="text-3xl font-bold text-yellow-600 mt-1">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Resolved</p>
+                        <p id="stat-resolved" class="text-3xl font-bold text-green-600 mt-1">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case History Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="text-xl font-bold" data-i18n="caseHistory">Case History</h2>
+                <button onclick="loadCases()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Refresh</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 text-left text-sm text-gray-500 font-medium">
+                            <th class="py-3 px-4">ID</th>
+                            <th class="py-3 px-4">Title</th>
+                            <th class="py-3 px-4" data-i18n="status">Status</th>
+                            <th class="py-3 px-4">Domain</th>
+                            <th class="py-3 px-4">Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cases-tbody">
+                        <tr><td colspan="5" class="text-center py-8 text-gray-400">Loading cases...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/app.js"></script>
+    <script>
+        // Update stats after loading cases
+        const origLoadCases = loadCases;
+        loadCases = async function() {
+            try {
+                const cases = await apiGet('/api/cases');
+                const tbody = document.getElementById('cases-tbody');
+                document.getElementById('stat-total').textContent = cases.length;
+                document.getElementById('stat-open').textContent = cases.filter(c => c.status === 'open').length;
+                document.getElementById('stat-progress').textContent = cases.filter(c => c.status === 'in_progress').length;
+                document.getElementById('stat-resolved').textContent = cases.filter(c => c.status === 'resolved').length;
+
+                if (cases.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400">No cases yet. Start a chat to create one.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = cases.map(c => `
+                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 font-mono text-xs text-gray-500">${c.id}</td>
+                        <td class="py-3 px-4 font-medium">${c.title || 'Untitled'}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor(c.status)}">${c.status}</span></td>
+                        <td class="py-3 px-4 text-sm text-gray-500">${c.legal_domain || '-'}</td>
+                        <td class="py-3 px-4 text-sm text-gray-500">${new Date(c.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                document.getElementById('cases-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-400">Failed to load cases</td></tr>';
+            }
+        };
+    </script>
+    <script src="/assets/js/pwa.js" defer></script>
+    <script src="/assets/js/network.js" defer></script>
+</body>
+</html>
