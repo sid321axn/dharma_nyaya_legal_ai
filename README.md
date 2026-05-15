@@ -20,79 +20,126 @@ Dharma-Nyaya bridges the gap between citizens and the legal system by providing 
 
 ## 🏗️ Technical Architecture
 
-The platform is a FastAPI backend orchestrating Gemma 4 multi-agent workflows, paired with an installable PWA frontend designed to keep working when the network does not. A dedicated **connectivity module** (`frontend/assets/js/network.js`) holds user chat messages locally while offline and flushes them automatically once the device is back online — making the app usable in rural / low-connectivity areas.
+The platform is fully deployed on **Google Cloud Platform**. Both the FastAPI backend (which also serves the PWA frontend as static assets) run as a single container on **Google Cloud Run**, persisting data to **Cloud SQL for MySQL**. The reasoning core is **Gemma-4-31b-it** invoked via the `google-genai` SDK, with high-stakes document workflows orchestrated through **Google Agent Development Kit (ADK)** agents. Legal references are produced through **Google Search Grounding** — every Chat, Predict, Spot-the-Trap, and Legal Tools response is verified against authentic government and court websites of the **detected jurisdiction** (India, UK, USA, Ukraine, EU, Australia, Canada, etc.) — not from a local KB.
 
 ```mermaid
 graph TD
     %% Styling
     classDef frontend fill:#3b82f6,stroke:#1e40af,stroke-width:2px,color:#fff
     classDef offline fill:#0d9488,stroke:#115e59,stroke-width:2px,color:#fff
+    classDef gcp fill:#4285F4,stroke:#1a56db,stroke-width:2px,color:#fff
     classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff
     classDef gemma fill:#8b5cf6,stroke:#5b21b6,stroke-width:2px,color:#fff
     classDef adk fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff
+    classDef ground fill:#ec4899,stroke:#9d174d,stroke-width:2px,color:#fff
     classDef db fill:#64748b,stroke:#374151,stroke-width:2px,color:#fff
 
-    subgraph "Client (PWA — works offline)"
-        UI[Frontend UI<br>HTML / JS / SSE]:::frontend
+    subgraph "Client (Installable PWA — works offline)"
+        UI[Frontend UI<br>HTML / JS / SSE / Tailwind]:::frontend
         Net[network.js<br>Reachability probe<br>Offline chat queue<br>Notifications]:::offline
         SW[Service Worker<br>App-shell + page cache<br>API offline 503]:::offline
         Q[(localStorage<br>chat queue + responses)]:::offline
         Pages[Offline Pages<br>Rights Card / Guides]:::offline
     end
 
-    subgraph "FastAPI Backend"
-        API[API Router<br>Chat / DocGen / Multimodal]:::backend
-        Orchestrator{Orchestrator<br>JSON Routing}:::backend
+    subgraph "☁️ Google Cloud Platform"
+        subgraph "Cloud Run (Containerised FastAPI + Static PWA)"
+            API[API Router<br>Chat / DocGen / Predict / Compare / TTS]:::gcp
+            Static[Static Mount<br>serves frontend/* as PWA]:::gcp
+            Orchestrator{Orchestrator<br>Jurisdiction-aware Routing<br>Clarification Engine}:::backend
 
-        subgraph "Single Agents"
-            Intake[Intake<br>Language / Domain]:::backend
-            Rights[Rights Advisor<br>RAG]:::backend
-            Vis[Vision<br>PDF / Image]:::backend
+            subgraph "Single Agents"
+                Intake[Intake Agent<br>Language / Domain / Jurisdiction]:::backend
+                Rights[Rights Advisor<br>Jurisdiction Detector + RAG fallback]:::backend
+                Action[Action Agent<br>Notices / RTI / Complaints]:::backend
+                Followup[Followup Tracker]:::backend
+                Vis[Vision Agent<br>PDF / Image]:::backend
+            end
+
+            subgraph "Google ADK Multi-Agent Pipeline"
+                ADK[ADK Runner + session_service]:::adk
+                A1[Situation Analyzer]:::adk
+                A2[Template Researcher]:::adk
+                A3[Document Drafter]:::adk
+                ADK --> A1 --> A2 --> A3
+            end
         end
 
-        subgraph "Google ADK Pipeline"
-            ADK[ADK Runner]:::adk
-            A1[Situation Analyzer]:::adk
-            A2[Template Researcher]:::adk
-            A3[Document Drafter]:::adk
-            ADK --> A1 --> A2 --> A3
-        end
-
-        DB[(In-Memory DB<br>Session / Case)]:::db
-        RAG[(RAG Service<br>Legal KB)]:::db
+        CSQL[(Cloud SQL for MySQL<br>Sessions / Cases / History)]:::gcp
+        CB[Cloud Build<br>Container CI/CD<br>cloudbuild.yaml]:::gcp
+        AR[Artifact Registry<br>Container Images]:::gcp
+        Secrets[Secret Manager<br>API keys / DB creds]:::gcp
     end
 
-    subgraph "Google AI"
-        Gemma[Gemma-4-31b-it<br>google-genai]:::gemma
-        Lite[LiteLlm Wrapper]:::gemma
+    subgraph "🔍 Google Search Grounding (Verified Sources)"
+        GSrch[Google Search Tool<br>googleSearch grounding]:::ground
+        Sources[Authentic Legal Sites by Jurisdiction:<br>🇮🇳 indiankanoon · indiacode.nic.in · sci.gov.in<br>🇬🇧 legislation.gov.uk · bailii.org<br>🇺🇸 law.cornell.edu · uscode.house.gov<br>🇺🇦 zakon.rada.gov.ua · court.gov.ua<br>🇪🇺 eur-lex.europa.eu · curia.europa.eu]:::ground
+        GSrch --> Sources
+    end
+
+    subgraph "🤖 Google AI Models"
+        Gemma[Gemma-4-31b-it<br>thinking_level=HIGH<br>via google-genai SDK]:::gemma
+        Lite[ADK LiteLlm Wrapper<br>gemini/gemma-4-31b-it]:::gemma
     end
 
     %% Online flow
-    UI -- "HTTP / SSE (online)" --> API
+    UI -- "HTTPS / SSE" --> API
     UI -- "queueOfflineChat() (offline)" --> Net
     Net <--> Q
     Net -- "auto-flush on reconnect" --> API
     Net -- "toast + system Notification" --> UI
     UI -.->|cache fallback| SW
     SW --> Pages
+    Static --> UI
 
     API --> Orchestrator
     Orchestrator --> Intake
     Orchestrator --> Rights
+    Orchestrator --> Action
+    Orchestrator --> Followup
     Orchestrator --> Vis
     Orchestrator --> ADK
 
-    Rights <--> RAG
-    API <--> DB
+    API <--> CSQL
 
+    %% Grounding flow — every user-facing reply is verified
     Intake <--> Gemma
     Rights <--> Gemma
+    Action <--> Gemma
     Vis <--> Gemma
+    Orchestrator <--> Gemma
+    Gemma <--> GSrch
+
     A1 <--> Lite
     A2 <--> Lite
     A3 <--> Lite
     Lite <--> Gemma
+
+    %% Deployment pipeline
+    CB --> AR --> API
+    Secrets -.-> API
 ```
+
+### ☁️ GCP Deployment Stack
+
+| Component | GCP Service | Purpose |
+|---|---|---|
+| **Backend + Frontend (single container)** | **Cloud Run** | FastAPI serves both `/api/*` JSON endpoints and the static PWA at `/` |
+| **Database** | **Cloud SQL for MySQL** | Persistent sessions, cases, message history |
+| **Container Build** | **Cloud Build** (`cloudbuild.yaml`) | CI build of Docker image on push |
+| **Container Registry** | **Artifact Registry** | Hosts the deployable container image |
+| **Secrets** | **Secret Manager** | `GEMINI_API_KEY`, DB credentials, third-party verification keys |
+| **AI Inference** | **Google AI Platform (google-genai SDK)** | Gemma-4-31b-it with `thinking_level=HIGH` |
+| **Verified References** | **Google Search Grounding** | `googleSearch` tool returns authentic, jurisdiction-correct legal source URLs |
+
+### 🌐 Verified Reference Grounding (replaces local KB)
+
+Every actionable response — **Chat, Predict, Spot-the-Trap, Risk Assessment, Roadmap, and Rights Analysis** — is grounded against **real legal websites** through Google Search:
+
+1. **Jurisdiction Detection** — input language (Cyrillic → Ukraine), explicit mentions ("I am from London" → UK), or cited statutes (GDPR → EU, Companies Act 2006 → UK) determine the legal system.
+2. **Source Restriction** — the AI is instructed to cite **only** official sites of the detected jurisdiction (e.g., `legislation.gov.uk` for UK queries, never `indiacode.nic.in`).
+3. **Title Humanization** — raw URLs are converted to readable titles (`legislation.gov.uk` → "UK Legislation") and rendered as clickable badges. The user never sees the bare URL.
+4. **Clarification First** — if jurisdiction or critical context is missing, the agent asks ONE targeted question instead of guessing.
 
 ### Connectivity & Offline Flow (built for remote areas)
 
@@ -103,16 +150,22 @@ graph TD
 
 ---
 
-## 🧠 How We Used Gemma 4 & Google ADK
+## 🧠 How We Used Gemma 4, Google ADK & Google Search Grounding
 
-1.  **Gemma 4 (31B-IT):** Served as the core reasoning engine.
+1.  **Gemma-4-31b-it:** Served as the core reasoning engine across all agents.
     *   Configured with `thinking_level="HIGH"` for deep legal reasoning.
-    *   Used structured prompt instructions (Function/JSON-calling style) for intent routing.
+    *   Used structured prompt instructions (Function/JSON-calling style) for intent routing and jurisdiction detection.
     *   Processed multimodal inputs (PDFs/Images) directly through `client.files.upload` to `client.models.generate_content`.
-2.  **Google ADK:** 
-    *   Used specifically for the high-stakes **Document Generation** feature (`app/agents/docgen_agents.py`).
-    *   Utilized the `Agent`, `Runner`, and `session_service` modules to chain three distinct reasoning steps (Situation -> Template -> Draft).
-    *   Gemma 4 wrapped via ADK's `LiteLlm("gemini/gemma-4-31b-it")`.
+    *   Invoked through the official `google-genai` Python SDK against Google AI endpoints.
+2.  **Google ADK (Agent Development Kit):**
+    *   Powers the high-stakes **Document Generation** workflow (`app/agents/docgen_agents.py`).
+    *   Uses `Agent`, `Runner`, and `session_service` modules to chain three reasoning steps (Situation → Template → Draft).
+    *   Gemma-4-31b-it is wrapped via ADK's `LiteLlm("gemini/gemma-4-31b-it")`.
+    *   Single-purpose agents (Intake, Rights, Action, Followup, Vision) follow the same agent pattern with the orchestrator routing between them.
+3.  **Google Search Grounding (verified citations):**
+    *   Enabled via `GenerateContentConfig(tools=[Tool(google_search=GoogleSearch())])` in `gemma_service.generate_text_with_sources()`.
+    *   Returns `grounding_metadata.grounding_chunks` containing real source URLs from the open web.
+    *   Replaces a static legal KB — references are **always current** and **always from official jurisdiction-specific sites** (Indian Kanoon, India Code, Supreme Court of India, UK Legislation, Cornell Law, EUR-Lex, Verkhovna Rada, etc.).
 
 ---
 
@@ -124,8 +177,8 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/sid321axn/dharma_nyaya_legal_ai.git
-cd dharma_nyaya_legal_ai
+git clone https://github.com/your-username/dharma-nyaya.git
+cd dharma-nyaya
 ```
 
 ### 2. Create a Virtual Environment & Install Dependencies
