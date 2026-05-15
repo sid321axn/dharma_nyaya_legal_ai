@@ -59,6 +59,7 @@ class Orchestrator:
         try:
             reply, agent_name = await self._execute_agent(
                 agent_name, route, message, intake, effective_lang, mode=mode,
+                session_id=session_id,
             )
         except Exception as e:
             logger.error(f"Orchestrator agent execution error: {e}")
@@ -121,6 +122,7 @@ class Orchestrator:
         try:
             reply, agent_name = await self._execute_agent(
                 agent_name, route, message, intake, effective_lang, mode=mode,
+                session_id=session_id,
             )
         except Exception as e:
             logger.error(f"Orchestrator agent execution error: {e}")
@@ -154,11 +156,13 @@ class Orchestrator:
 
     async def _execute_agent(self, agent_name: str, route: dict, message: str,
                              intake: IntakeResult, lang: str,
-                             mode: str | None = None) -> tuple[str, str]:
+                             mode: str | None = None,
+                             session_id: str | None = None) -> tuple[str, str]:
         """Execute the selected agent and return (reply, agent_name)."""
         if agent_name == "rights_analyzer":
             result = await rights_agent.analyze(
-                message, legal_domain=intake.legal_domain, language=lang
+                message, legal_domain=intake.legal_domain, language=lang,
+                jurisdiction=intake.jurisdiction or "",
             )
             reply = result.legal_explanation
 
@@ -181,31 +185,80 @@ class Orchestrator:
         else:
             settings = get_settings()
             general_system = (
-                "You are DHARMA-NYAYA, an AI legal assistant. "
+                "You are DHARMA-NYAYA, an AI legal assistant covering multiple jurisdictions worldwide. "
                 "Help citizens understand their legal rights in simple terms. "
                 "Be empathetic, clear, and actionable. "
                 "Use ### headings with emojis, **bold** key terms, bullet points, and --- separators. "
-                "End with a warm invitation asking the user to ask follow-up questions."
+
+                "CLARIFICATION RULE: Before giving a detailed response, check if critical information is missing. "
+                "If the country or jurisdiction is NOT clearly stated, ask: "
+                "'Could you tell me which country or state you are in, so I can give you the exact law that applies?' "
+                "If the nature of the issue is vague or ambiguous, ask ONE short clarifying question. "
+                "If the user's role (tenant/landlord, employee/employer, buyer/seller) is unclear and it matters, ask which side they are on. "
+                "Ask ONLY ONE clarifying question at a time. "
+                "If enough information IS already present, give the full response without asking. "
+
+                "JURISDICTION DETECTION (when you have enough info): "
+                "(a) any city/country mention determines the jurisdiction — London/England/Britain/UK → UK law; "
+                "New York/California/USA → US law; Ukraine/Kyiv → Ukrainian law; etc. "
+                "(b) if they write in Ukrainian/Cyrillic → Ukrainian law; "
+                "(c) if they cite foreign laws (GDPR, CCPA, Companies Act 2006) → that country's law; "
+                "(d) default to India ONLY when absolutely no other jurisdiction is detectable. "
+                "NEVER apply Indian law (IPC, CrPC, Indian Contract Act, etc.) when the user is in another country. "
+
+                "ALWAYS end your response with a '\U0001f4da **References**' section containing 2-4 authentic "
+                "clickable links from official legal sources of the RELEVANT JURISDICTION. "
+                "Format each reference as: - [Resource Name](https://exact-url) — one per line. "
+                "Jurisdiction sources — use ONLY the relevant set: "
+                "India: indiankanoon.org, indiacode.nic.in, sci.gov.in, legislative.gov.in, nalsa.gov.in, rtionline.gov.in | "
+                "USA: law.cornell.edu, uscode.house.gov, ftc.gov, dol.gov, justia.com | "
+                "UK: legislation.gov.uk, gov.uk, citizensadvice.org.uk, bailii.org | "
+                "Ukraine: zakon.rada.gov.ua, minjust.gov.ua, court.gov.ua | "
+                "EU: eur-lex.europa.eu, curia.europa.eu | "
+                "Australia: legislation.gov.au, austlii.edu.au | "
+                "Canada: laws-lois.justice.gc.ca, canlii.org | "
+                "Other: official national parliament and supreme court websites of that country. "
+                "After the references, add a warm invitation asking the user to ask follow-up questions."
             )
             if mode == "voice":
-                # Voice mode: short, conversational, no markdown chrome, no source block.
-                # The reply is read out by TTS, so plain spoken English/Hindi works best.
+                # Voice mode: strict one-step-at-a-time conversational flow.
+                # The reply is spoken aloud by TTS — plain sentences only, no markdown.
                 voice_system = (
-                    "You are DHARMA-NYAYA, an AI legal assistant speaking to a citizen "
-                    "over a LIVE VOICE call. Reply in a warm, conversational tone — like "
-                    "a knowledgeable friend, not a textbook.\n\n"
-                    "STRICT VOICE RULES:\n"
-                    "- Keep the reply SHORT: 2 to 4 sentences, max ~80 words.\n"
-                    "- Address the user's specific question directly. No long preambles.\n"
-                    "- NO markdown, NO headings, NO bullet points, NO emojis, NO links, "
-                    "NO source citations — just plain spoken sentences.\n"
-                    "- Mention at most ONE Act or section, only if essential.\n"
-                    "- ALWAYS end with a friendly question inviting more details, "
-                    "e.g. 'Would you like to know more?' or 'Shall I explain how to file it?' "
-                    "— phrased naturally in the user's language."
+                    "You are DHARMA-NYAYA, an AI legal advisor on a LIVE VOICE CALL. "
+                    "The user CANNOT see text — they can only HEAR your words.\n\n"
+                    "MANDATORY RULES — follow every single one:\n"
+                    "1. Give ONLY ONE piece of information, ONE step, or ONE point per reply. "
+                    "Never list multiple steps or points in a single response.\n"
+                    "2. Keep every reply to 2-3 sentences maximum (under 50 words).\n"
+                    "3. ALWAYS end with a short follow-up question to continue the conversation, "
+                    "such as 'Want me to explain the next step?' or 'Should I tell you more about this?' "
+                    "or 'Would you like to know what to do next?' — phrased naturally in the user's language.\n"
+                    "4. If the user says 'yes', 'continue', 'tell me more', 'next', or similar — "
+                    "give the NEXT single step or point only, then ask again.\n"
+                    "5. NEVER use markdown, headings, bullet points, numbered lists, emojis, "
+                    "bold text, asterisks, or any symbols — only natural spoken sentences.\n"
+                    "6. Do NOT repeat what was already said in earlier turns.\n"
+                    "7. Speak like a warm, knowledgeable friend — not a textbook or legal document."
                 )
+
+                # Build a history-aware prompt so the AI knows what was already covered.
+                history_context = ""
+                if session_id:
+                    try:
+                        past = get_history(session_id, limit=6)  # last 3 turns
+                        if past:
+                            lines = []
+                            for turn in past:
+                                role = "User" if turn.get("role") == "user" else "Advisor"
+                                lines.append(f"{role}: {turn.get('content', '')}")
+                            history_context = "Recent conversation:\n" + "\n".join(lines) + "\n\nUser's new message: "
+                    except Exception:
+                        pass
+
+                voice_prompt = history_context + message
                 reply = await gemma_service.generate_text(
-                    message, language=lang, system_instruction=voice_system,
+                    voice_prompt, language=lang, system_instruction=voice_system,
+                    voice_mode=True,
                 )
             elif settings.USE_GOOGLE_SEARCH_GROUNDING:
                 grounded = await gemma_service.generate_text_with_sources(
