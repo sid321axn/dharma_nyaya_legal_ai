@@ -30,8 +30,13 @@ class GemmaService:
         return self._client
 
     async def generate_text(self, prompt: str, language: str = "en",
-                            system_instruction: str = "") -> str:
-        """Generate text using Gemma model (streaming collected to string)."""
+                            system_instruction: str = "",
+                            voice_mode: bool = False) -> str:
+        """Generate text using Gemma model (streaming collected to string).
+
+        Set ``voice_mode=True`` to suppress markdown/format instructions so the
+        response contains only plain spoken sentences suitable for TTS playback.
+        """
         from app.models.schemas import LANGUAGE_NAMES
         lang_name = LANGUAGE_NAMES.get(language, language)
 
@@ -45,16 +50,20 @@ class GemmaService:
         else:
             lang_instruction = ""
 
-        format_instruction = (
-            "FORMAT RULES: "
-            "- Use emojis at the start of each section heading (e.g. ⚖️, 📋, 🛡️, 💡, 📌, ✅, ⚠️, 🔍). "
-            "- Use ### for main section headings and **bold** for key terms. "
-            "- Use bullet points and numbered lists for clarity. "
-            "- Use --- horizontal rules to separate sections. "
-            "- Keep language simple, empathetic, and citizen-friendly. "
-            "- At the very end of your response, add a warm line inviting the user to ask "
-            "follow-up questions if they need more help or don't understand something. "
-        )
+        if voice_mode:
+            # Voice/TTS: no markdown, no formatting — system_instruction carries all rules.
+            format_instruction = ""
+        else:
+            format_instruction = (
+                "FORMAT RULES: "
+                "- Use emojis at the start of each section heading (e.g. ⚖️, 📋, 🛡️, 💡, 📌, ✅, ⚠️, 🔍). "
+                "- Use ### for main section headings and **bold** for key terms. "
+                "- Use bullet points and numbered lists for clarity. "
+                "- Use --- horizontal rules to separate sections. "
+                "- Keep language simple, empathetic, and citizen-friendly. "
+                "- At the very end of your response, add a warm line inviting the user to ask "
+                "follow-up questions if they need more help or don't understand something. "
+            )
 
         full_system = (
             "You are DHARMA-NYAYA, an AI legal assistant that helps citizens understand "
@@ -208,12 +217,86 @@ class GemmaService:
     @staticmethod
     def format_sources_markdown(sources: list[dict]) -> str:
         """Render a list of sources as a Markdown 'Sources' section."""
+    # Well-known legal sites → proper display names
+    _KNOWN_SITE_NAMES: dict[str, str] = {
+        "indiankanoon.org": "Indian Kanoon",
+        "indiacode.nic.in": "India Code",
+        "sci.gov.in": "Supreme Court of India",
+        "main.sci.gov.in": "Supreme Court of India",
+        "legislative.gov.in": "Ministry of Law – Legislative Dept",
+        "labour.gov.in": "Ministry of Labour & Employment",
+        "consumeraffairs.nic.in": "Consumer Affairs Ministry",
+        "nalsa.gov.in": "NALSA – Legal Aid Services",
+        "rtionline.gov.in": "RTI Online Portal",
+        "rera.gov.in": "RERA Portal",
+        "zakon.rada.gov.ua": "Verkhovna Rada – Ukraine Laws",
+        "minjust.gov.ua": "Ministry of Justice – Ukraine",
+        "court.gov.ua": "Ukrainian Courts",
+        "eur-lex.europa.eu": "EUR-Lex – EU Law",
+        "curia.europa.eu": "Court of Justice of the EU",
+        "legislation.gov.uk": "UK Legislation",
+        "gov.uk": "UK Government",
+        "citizensadvice.org.uk": "Citizens Advice (UK)",
+        "bailii.org": "BAILII – UK & Irish Law",
+        "law.cornell.edu": "Cornell Law School",
+        "uscode.house.gov": "US Code",
+        "ftc.gov": "FTC – US Federal Trade Commission",
+        "dol.gov": "US Dept of Labor",
+        "consumerfinance.gov": "US Consumer Financial Protection",
+        "justia.com": "Justia – US Law",
+        "legislation.gov.au": "Australian Legislation",
+        "austlii.edu.au": "AustLII – Australian Law",
+        "laws-lois.justice.gc.ca": "Canada Laws – Justice.gc.ca",
+        "canlii.org": "CanLII – Canadian Law",
+        "legalservicesindia.com": "Legal Services India",
+    }
+
+    @staticmethod
+    def _humanize_title(raw: str) -> str:
+        """Convert a bare domain name to a readable display title."""
+        import re as _re
+        if not raw:
+            return "Source"
+        # Check known-names lookup first (raw may be the domain itself)
+        known = GemmaService._KNOWN_SITE_NAMES.get(raw.lower().rstrip("/"))
+        if known:
+            return known
+        # If it already looks like a proper title (has spaces), keep it
+        if " " in raw or sum(1 for c in raw if c.isupper()) > 1:
+            return raw
+        clean = raw.split("/")[0].lower()
+        # Strip multi-part gov TLDs (.nic.in, .gov.in, .gov.uk, etc.)
+        clean = _re.sub(r"\.(nic|gov|org|ac|co|edu)\.(in|uk|au|nz|za)$", "", clean)
+        # Strip single TLDs
+        clean = _re.sub(r"\.(com|co|in|org|net|gov|edu|io|uk|au|ca|de|fr|ua|eu|info|law)$", "", clean)
+        # Strip common subdomains
+        clean = _re.sub(r"^(www|m|en|main)\.", "", clean)
+        # Replace delimiters with spaces and title-case
+        clean = _re.sub(r"[-_.]", " ", clean).strip()
+        return clean.title() if clean else raw
+
+    @staticmethod
+    def format_sources_markdown(sources: list[dict]) -> str:
+        """Render grounding sources as HTML badge links (no raw URLs shown)."""
         if not sources:
             return ""
-        lines = ["", "---", "", "### 🔗 Sources (Google Search Grounded)", ""]
-        for i, s in enumerate(sources, 1):
-            lines.append(f"{i}. [{s.get('title') or s.get('uri')}]({s.get('uri')})")
-        return "\n".join(lines)
+        badges = "".join(
+            f'<a href="{s.get("uri", "#")}" target="_blank" rel="noopener noreferrer" '
+            f'style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;'
+            f'background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:9999px;'
+            f'font-size:12px;font-weight:500;text-decoration:none;margin:3px 3px 0 0;">'
+            f'<span>\U0001f517</span>'
+            f'<span>{GemmaService._humanize_title(s.get("title") or "")}</span>'
+            f'</a>'
+            for s in sources
+        )
+        return (
+            f'<div style="margin-top:14px;padding-top:12px;border-top:1px solid #e5e7eb;">'
+            f'<p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;'
+            f'letter-spacing:0.05em;margin-bottom:8px;">\U0001f517 Verified Sources</p>'
+            f'<div style="display:flex;flex-wrap:wrap;gap:4px;">{badges}</div>'
+            f'</div>'
+        )
 
     @staticmethod
     def format_grounding_block(sources: list[dict]) -> str:
