@@ -1,7 +1,7 @@
 """Precedent-Based Case Outcome Prediction API routes.
 
-Accepts case details and predicts likely outcomes based on Indian legal
-precedents, landmark judgments, and statutory provisions.
+Accepts case details and predicts likely outcomes based on legal
+precedents, landmark judgments, and statutory provisions for the relevant jurisdiction.
 """
 
 import json
@@ -34,12 +34,12 @@ class PredictRequest(BaseModel):
 
 @router.post("/outcome", dependencies=[Depends(rate_limit_dependency)])
 async def predict_outcome(req: PredictRequest):
-    """Predict case outcome based on Indian legal precedents."""
+    """Predict case outcome based on legal precedents for the relevant jurisdiction."""
     case_desc = sanitize_input(req.case_description)
     case_type = sanitize_input(req.case_type) if req.case_type else "general"
     user_role = sanitize_input(req.user_role) if req.user_role else "petitioner"
 
-    prompt = f"""You are an expert Indian legal analyst specializing in case outcome prediction using precedent-based analysis.
+    prompt = f"""You are an expert legal analyst specializing in case outcome prediction using precedent-based analysis across multiple jurisdictions.
 
 CASE DETAILS:
 Category: {case_type}
@@ -89,12 +89,28 @@ Respond with ONLY a valid JSON object:
   ],
   "timeline_estimate": "<typical duration for such cases>",
   "next_steps": ["<recommended action>"],
-  "disclaimer": "This is an AI-generated prediction based on legal precedents. It is not legal advice. Consult a qualified lawyer for professional guidance."
+  "disclaimer": "This is an AI-generated prediction based on legal precedents. It is not legal advice. Consult a qualified lawyer for professional guidance.",
+  "references": [
+    {{"title": "<official source name for the detected jurisdiction>", "uri": "<exact real URL from the official legal site of that country>"}}
+  ]
 }}
 
+JURISDICTION-AWARE REFERENCE RULES:
+- Include 3-5 authentic references with real, working URLs from the DETECTED JURISDICTION ONLY.
+- India (default): indiankanoon.org, indiacode.nic.in, sci.gov.in, legislative.gov.in, labour.gov.in, consumeraffairs.nic.in, nalsa.gov.in, rtionline.gov.in, rera.gov.in
+- USA: law.cornell.edu, uscode.house.gov, uscourts.gov, ftc.gov, dol.gov, consumerfinance.gov, justia.com
+- UK: legislation.gov.uk, judiciary.uk, gov.uk, citizensadvice.org.uk, bailii.org
+- Ukraine: zakon.rada.gov.ua, court.gov.ua, minjust.gov.ua
+- EU: eur-lex.europa.eu, curia.europa.eu
+- Australia: legislation.gov.au, austlii.edu.au, hcourt.gov.au
+- Canada: laws-lois.justice.gc.ca, canlii.org, scc-csc.ca
+- Other: official national parliament, supreme court, and government legal portal of that country.
+- NEVER include Indian legal sites for non-Indian queries. NEVER include foreign sites for Indian queries.
+- Prefer direct links to the specific Act, section, or case search page relevant to this case.
+
 IMPORTANT:
-- Cite REAL Indian landmark cases wherever possible.
-- Reference actual statutes and sections of Indian law.
+- Cite REAL landmark cases from the detected jurisdiction wherever possible.
+- Reference actual statutes and sections of law from that jurisdiction.
 - Be realistic about confidence and probabilities.
 - Consider the user's role ({user_role}) and analyze from their perspective.
 - List at least 3-5 relevant precedents.
@@ -171,7 +187,13 @@ IMPORTANT:
         pred = analysis["prediction"]
         pred["confidence"] = max(1, min(100, int(pred.get("confidence", 40))))
         analysis["language"] = req.language
-        analysis["sources"] = sources
+        # Prefer grounding sources; fall back to AI-generated references
+        ai_refs = [
+            {"title": r.get("title", ""), "uri": r.get("uri", "")}
+            for r in analysis.get("references", [])
+            if str(r.get("uri", "")).startswith("http")
+        ]
+        analysis["sources"] = sources if sources else ai_refs
         return analysis
 
     except Exception as e:

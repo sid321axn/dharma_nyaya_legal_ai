@@ -141,9 +141,23 @@ Analyze Document A against Document B and respond with ONLY a valid JSON object:
   ],
   "safe_clauses": ["<clause that is fair and standard>"],
   "recommendations": ["<action recommendation>"],
-  "legal_references": ["<relevant Indian law/section>"]
+  "legal_references": ["<relevant law/section for the detected jurisdiction>"],
+  "references": [
+    {{"title": "<official source name for the detected jurisdiction>", "uri": "<exact real URL from the official legal site of that country>"}}
+  ]
 }}
 
+JURISDICTION-AWARE REFERENCE RULES:
+- Detect jurisdiction from: document language, country/law names in the document, or explicit mentions.
+- India (default): indiacode.nic.in, indiankanoon.org, sci.gov.in, legislative.gov.in, labour.gov.in, consumeraffairs.nic.in, rera.gov.in, rtionline.gov.in
+- USA: law.cornell.edu, ftc.gov, dol.gov, consumerfinance.gov, uscode.house.gov, justia.com
+- UK: legislation.gov.uk, gov.uk, citizensadvice.org.uk, bailii.org
+- Ukraine: zakon.rada.gov.ua, minjust.gov.ua
+- EU: eur-lex.europa.eu
+- Australia: legislation.gov.au, accc.gov.au, austlii.edu.au
+- Canada: laws-lois.justice.gc.ca, canlii.org
+- Other: official national parliament and government legal portals of that country.
+- NEVER mix jurisdictions. Use 3-5 real URLs from the detected jurisdiction ONLY.
 Be thorough. Find ALL traps and unfair terms. Protect the common citizen."""
     else:
         prompt = f"""You are an expert legal document analyst protecting consumers and common citizens.
@@ -181,9 +195,23 @@ Analyze this document from the perspective of protecting the weaker party (tenan
   ],
   "safe_clauses": ["<clause that is fair and standard>"],
   "recommendations": ["<action recommendation>"],
-  "legal_references": ["<relevant Indian law/section>"]
+  "legal_references": ["<relevant law/section for the detected jurisdiction>"],
+  "references": [
+    {{"title": "<official source name for the detected jurisdiction>", "uri": "<exact real URL from the official legal site of that country>"}}
+  ]
 }}
 
+JURISDICTION-AWARE REFERENCE RULES:
+- Detect jurisdiction from: document language, country/law names in the document, or explicit mentions.
+- India (default): indiacode.nic.in, indiankanoon.org, sci.gov.in, legislative.gov.in, labour.gov.in, consumeraffairs.nic.in, rera.gov.in, rtionline.gov.in
+- USA: law.cornell.edu, ftc.gov, dol.gov, consumerfinance.gov, uscode.house.gov, justia.com
+- UK: legislation.gov.uk, gov.uk, citizensadvice.org.uk, bailii.org
+- Ukraine: zakon.rada.gov.ua, minjust.gov.ua
+- EU: eur-lex.europa.eu
+- Australia: legislation.gov.au, accc.gov.au, austlii.edu.au
+- Canada: laws-lois.justice.gc.ca, canlii.org
+- Other: official national parliament and government legal portals of that country.
+- NEVER mix jurisdictions. Use 3-5 real URLs from the detected jurisdiction ONLY.
 Be thorough and specific. Quote exact text from the document. Protect the common citizen."""
 
     try:
@@ -191,10 +219,10 @@ Be thorough and specific. Quote exact text from the document. Protect the common
         sources: list[dict] = []
         validations: list[dict] = []
         compare_system = (
-            "You are a legal document comparison expert specializing in Indian law. "
+            "You are a legal document analysis expert covering multiple jurisdictions worldwide. "
             "Your job is to protect common citizens from unfair contracts and agreements. "
-            "Use Google Search to verify references against current Indian Acts "
-            "(Indian Contract Act, Consumer Protection Act, IT Act, RERA, etc.) and recent judgments. "
+            "Detect the jurisdiction from the document language, referenced laws, or country names. "
+            "Use Google Search to verify references against the applicable laws of the detected jurisdiction. "
             "Respond with ONLY valid JSON. No markdown, no code blocks, no extra text. "
             "Be specific — quote exact clauses. Be thorough — find every trap."
         )
@@ -227,7 +255,13 @@ Be thorough and specific. Quote exact text from the document. Protect the common
         analysis["risk_score"] = max(1, min(100, int(analysis.get("risk_score", 50))))
         analysis["language"] = req.language
         analysis["mode"] = "compare" if doc_b else "review"
-        analysis["sources"] = sources
+        # Prefer grounding sources; fall back to AI-generated references
+        ai_refs = [
+            {"title": r.get("title", ""), "uri": r.get("uri", "")}
+            for r in analysis.get("references", [])
+            if str(r.get("uri", "")).startswith("http")
+        ]
+        analysis["sources"] = sources if sources else ai_refs
         return analysis
 
     except Exception as e:

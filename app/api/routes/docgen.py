@@ -185,8 +185,23 @@ You MUST respond with ONLY a valid JSON object (no markdown, no code fences, no 
   "strengths": ["<strength 1>", "<strength 2>", ...],
   "recommendations": ["<recommendation 1>", "<recommendation 2>", ...],
   "time_estimate": "<estimated timeline for resolution>",
-  "estimated_cost": "<rough cost estimate range>"
+  "estimated_cost": "<rough cost estimate range>",
+  "references": [
+    {{"title": "<official source name for the detected jurisdiction>", "uri": "<exact real URL from the official legal site of that country>"}}
+  ]
 }}
+
+JURISDICTION-AWARE REFERENCE RULES:
+- Detect jurisdiction from language of the query, country/law names mentioned, or explicit location.
+- India (default): indiankanoon.org, indiacode.nic.in, sci.gov.in, legislative.gov.in, labour.gov.in, consumeraffairs.nic.in, nalsa.gov.in, rtionline.gov.in
+- USA: law.cornell.edu, uscode.house.gov, ftc.gov, dol.gov, consumerfinance.gov, justia.com
+- UK: legislation.gov.uk, gov.uk, citizensadvice.org.uk, bailii.org
+- Ukraine: zakon.rada.gov.ua, minjust.gov.ua, court.gov.ua
+- EU: eur-lex.europa.eu, curia.europa.eu
+- Australia: legislation.gov.au, austlii.edu.au, accc.gov.au
+- Canada: laws-lois.justice.gc.ca, canlii.org
+- Other: official national parliament and government legal portals of that country.
+- NEVER mix jurisdictions. Include 2-4 real URLs from the detected jurisdiction ONLY.
 
 Risk scoring guide:
 - 1-25: Low risk (strong case, favorable outcome likely)
@@ -225,7 +240,11 @@ Legal situation: {context}"""
         assessment["risk_score"] = max(1, min(100, int(assessment.get("risk_score", 50))))
         assessment["success_probability"] = max(1, min(100, int(assessment.get("success_probability", 50))))
         assessment["language"] = req.language
-
+        assessment["references"] = [
+            {"title": r.get("title", ""), "uri": r.get("uri", "")}
+            for r in assessment.get("references", [])
+            if str(r.get("uri", "")).startswith("http")
+        ]
         return assessment
 
     except Exception as e:
@@ -270,10 +289,24 @@ You MUST respond with ONLY a valid JSON object (no markdown, no code fences). Us
     }}
   ],
   "important_notes": ["<note 1>", "<note 2>"],
-  "legal_provisions": ["<relevant law/section 1>", "<relevant law/section 2>"]
+  "legal_provisions": ["<relevant law/section 1>", "<relevant law/section 2>"],
+  "references": [
+    {{"title": "<official source name for the detected jurisdiction>", "uri": "<exact real URL from the official legal site of that country>"}}
+  ]
 }}
 
-Provide 5-8 concrete, actionable steps. Be specific to Indian legal system.
+JURISDICTION-AWARE REFERENCE RULES:
+- Detect jurisdiction from language of the query, country/law names mentioned, or explicit location.
+- India (default): indiankanoon.org, indiacode.nic.in, sci.gov.in, legislative.gov.in, labour.gov.in, consumeraffairs.nic.in, nalsa.gov.in, rtionline.gov.in
+- USA: law.cornell.edu, uscode.house.gov, ftc.gov, dol.gov, consumerfinance.gov, justia.com
+- UK: legislation.gov.uk, gov.uk, citizensadvice.org.uk, bailii.org
+- Ukraine: zakon.rada.gov.ua, minjust.gov.ua, court.gov.ua
+- EU: eur-lex.europa.eu, curia.europa.eu
+- Australia: legislation.gov.au, austlii.edu.au, hcourt.gov.au
+- Canada: laws-lois.justice.gc.ca, canlii.org
+- Other: official national parliament and government legal portals of that country.
+- NEVER mix jurisdictions. Include 2-4 real URLs from the detected jurisdiction ONLY.
+Provide 5-8 concrete, actionable steps. Be specific to the detected jurisdiction's legal system.
 {f'Legal domain: {req.legal_domain}' if req.legal_domain else ''}
 
 Legal situation: {context}"""
@@ -283,7 +316,7 @@ Legal situation: {context}"""
             prompt,
             language=req.language,
             system_instruction=(
-                "You are a legal process expert specializing in Indian law. "
+                "You are a legal process expert covering multiple jurisdictions worldwide. "
                 "Respond with ONLY valid JSON. No markdown, no code blocks. "
                 "Provide practical, step-by-step guidance."
             ),
@@ -300,6 +333,11 @@ Legal situation: {context}"""
             }
 
         roadmap["language"] = req.language
+        roadmap["references"] = [
+            {"title": r.get("title", ""), "uri": r.get("uri", "")}
+            for r in roadmap.get("references", [])
+            if str(r.get("uri", "")).startswith("http")
+        ]
         return roadmap
 
     except Exception as e:
