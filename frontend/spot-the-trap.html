@@ -53,7 +53,6 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <a href="/chat" class="text-sm text-gray-500 hover:text-indigo-600 transition">Chat</a>
-                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
                     <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold">🚨 SOS</a>
                     <a href="/legal-docs" class="text-sm text-gray-500 hover:text-indigo-600 transition">⚖️ Legal Tools</a>
                     <a href="/predict" class="text-sm text-purple-500 hover:text-purple-700 transition font-semibold">⚖️ Predict</a>
@@ -76,8 +75,8 @@
     <div class="pt-16">
         <div class="bg-gradient-to-r from-red-600 via-rose-600 to-orange-500 py-8 px-4">
             <div class="max-w-5xl mx-auto text-center">
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">🔍 Spot the Trap</h1>
-                <p class="text-rose-100 text-sm sm:text-base max-w-2xl mx-auto">Paste your contract, rental agreement, or any legal document — our AI will find every unfair clause, hidden risk, and missing protection.</p>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2" data-i18n="trapTitle">🔍 Spot the Trap</h1>
+                <p class="text-rose-100 text-sm sm:text-base max-w-2xl mx-auto" data-i18n="trapSubtitle">Paste your contract, rental agreement, or any legal document — our AI will find every unfair clause, hidden risk, and missing protection.</p>
             </div>
         </div>
     </div>
@@ -85,10 +84,10 @@
     <div class="max-w-6xl mx-auto px-4 py-8">
         <!-- Mode Toggle -->
         <div class="flex items-center justify-center mb-6 gap-3">
-            <button id="mode-review" onclick="setMode('review')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-red-600 text-white shadow">
+            <button id="mode-review" onclick="setMode('review')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-red-600 text-white shadow" data-i18n="trapTabReview">
                 🔎 Review My Document
             </button>
-            <button id="mode-compare" onclick="setMode('compare')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-gray-100 text-gray-600 hover:bg-gray-200">
+            <button id="mode-compare" onclick="setMode('compare')" class="px-5 py-2 rounded-xl text-sm font-semibold transition bg-gray-100 text-gray-600 hover:bg-gray-200" data-i18n="trapTabCompare">
                 ⚖️ Compare Two Documents
             </button>
         </div>
@@ -100,17 +99,17 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                     <div class="flex items-center gap-2 mb-3">
                         <span class="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-sm">📄</span>
-                        <h3 class="font-bold text-gray-800">Your Document</h3>
-                        <span class="text-xs text-red-500 font-medium">(Under Review)</span>
+                        <h3 class="font-bold text-gray-800" data-i18n="trapYourDocument">Your Document</h3>
+                        <span class="text-xs text-red-500 font-medium" data-i18n="trapUnderReview">(Under Review)</span>
                     </div>
-                    <textarea id="doc-a" rows="10" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent leading-relaxed" placeholder="Paste your rental agreement, employment contract, loan agreement, or any legal document here..."></textarea>
+                    <textarea id="doc-a" rows="10" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent leading-relaxed" data-i18n="trapDocPlaceholder" placeholder="Paste your rental agreement, employment contract, loan agreement, or any legal document here..."></textarea>
                     <div class="flex items-center justify-between mt-2">
-                        <span id="doc-a-count" class="text-xs text-gray-400">0 characters</span>
+                        <span id="doc-a-count" class="text-xs text-gray-400">0 <span data-i18n="trapCharacters">characters</span></span>
                         <div class="flex items-center gap-3">
-                            <button onclick="loadSample('a')" class="text-xs text-indigo-500 hover:text-indigo-700 transition">Load sample</button>
+                            <button onclick="loadSample('a')" class="text-xs text-indigo-500 hover:text-indigo-700 transition" data-i18n="trapLoadSample">Load sample</button>
                             <label class="cursor-pointer flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 transition font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                Upload PDF / Word
+                                <span data-i18n="trapUploadFile">Upload PDF / Word</span>
                                 <input type="file" accept=".pdf,.docx" class="hidden" onchange="uploadFile(this, 'a')">
                             </label>
                         </div>
@@ -153,9 +152,9 @@
             <div id="controls-panel">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-full flex flex-col justify-between">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="trapDocTypeLabel">Document Type</label>
                         <select id="doc-type" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-red-400 mb-4">
-                            <option value="">Auto-detect</option>
+                            <option value="" data-i18n="trapDocTypeAuto">Auto-detect</option>
                             <option value="Rental / Lease Agreement">Rental / Lease Agreement</option>
                             <option value="Employment Contract">Employment Contract</option>
                             <option value="Loan Agreement">Loan Agreement</option>
@@ -169,21 +168,21 @@
                         </select>
 
                         <div class="bg-red-50 border border-red-100 rounded-xl p-4 mb-4">
-                            <h4 class="text-sm font-semibold text-red-700 mb-2">🛡️ What we check for:</h4>
+                            <h4 class="text-sm font-semibold text-red-700 mb-2" data-i18n="trapWhatWeCheck">🛡️ What we check for:</h4>
                             <ul class="text-xs text-red-600 space-y-1">
-                                <li>• Unfair / exploitative clauses</li>
-                                <li>• One-sided termination rights</li>
-                                <li>• Hidden penalties &amp; forfeiture terms</li>
-                                <li>• Missing protections (security deposit refund, notice period, etc.)</li>
-                                <li>• Ambiguous language that could be misused</li>
-                                <li>• Violations of Indian contract law &amp; consumer rights</li>
+                                <li data-i18n="trapCheck1">• Unfair / exploitative clauses</li>
+                                <li data-i18n="trapCheck2">• One-sided termination rights</li>
+                                <li data-i18n="trapCheck3">• Hidden penalties &amp; forfeiture terms</li>
+                                <li data-i18n="trapCheck4">• Missing protections (security deposit refund, notice period, etc.)</li>
+                                <li data-i18n="trapCheck5">• Ambiguous language that could be misused</li>
+                                <li data-i18n="trapCheck6">• Violations of Indian contract law &amp; consumer rights</li>
                             </ul>
                         </div>
                     </div>
 
                     <button id="analyze-btn" onclick="analyzeDocument()" class="w-full py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold text-sm hover:from-red-700 hover:to-rose-700 transition shadow-lg shadow-red-200 flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Scan for Traps
+                        <span data-i18n="trapScanButton">Scan for Traps</span>
                     </button>
                 </div>
             </div>
@@ -303,6 +302,10 @@
             </div>
         </div>
     </div>
+
+    <!-- i18n must load before inline script so setLanguage() is available -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/app.js"></script>
 
     <script>
     let currentMode = 'review';

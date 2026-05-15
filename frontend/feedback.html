@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback — DHARMA-NYAYA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .star { color: #f59e0b; }
+        .star-empty { color: #d1d5db; }
+        .tbl-row:hover { background: #faf5ff; }
+        .badge {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .badge-5 { background:#dcfce7; color:#166534; }
+        .badge-4 { background:#d1fae5; color:#047857; }
+        .badge-3 { background:#fef9c3; color:#854d0e; }
+        .badge-2 { background:#ffedd5; color:#9a3412; }
+        .badge-1 { background:#fee2e2; color:#991b1b; }
+        .skeleton {
+            background: linear-gradient(90deg,#f3f4f6 0%,#e5e7eb 50%,#f3f4f6 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+    </style>
+</head>
+<body class="antialiased min-h-screen bg-gray-50 text-gray-800">
+
+    <!-- Top Nav -->
+    <nav class="nav-glass w-full z-50 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">DHARMA-NYAYA</span>
+                </a>
+                <div class="flex items-center space-x-3 text-sm">
+                    <a href="/" class="text-gray-500 hover:text-indigo-600">Home</a>
+                    <a href="/dashboard" class="text-gray-500 hover:text-indigo-600">Dashboard</a>
+                    <a href="/chat" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Start Chat</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900">💬 User Feedback</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    All valid feedback received from across the platform — name, location, time and message.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <label class="flex items-center gap-2 text-sm bg-white border border-gray-200 rounded-lg px-3 py-1.5">
+                    <input id="valid-only" type="checkbox" checked class="accent-indigo-600">
+                    Valid only (with message)
+                </label>
+                <label class="flex items-center gap-2 text-sm bg-white border border-gray-200 rounded-lg px-3 py-1.5">
+                    Min rating
+                    <select id="min-rating" class="bg-transparent text-sm focus:outline-none">
+                        <option value="1">1★</option>
+                        <option value="2">2★</option>
+                        <option value="3">3★</option>
+                        <option value="4">4★</option>
+                        <option value="5">5★</option>
+                    </select>
+                </label>
+                <input id="search" type="search" placeholder="Search name, message, page…"
+                    class="text-sm bg-white border border-gray-200 rounded-lg px-3 py-1.5 w-56 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <button id="refresh-btn"
+                    class="text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">
+                    🔄 Refresh
+                </button>
+                <button id="export-btn"
+                    class="text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-semibold">
+                    ⬇ CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="text-xs text-gray-500 uppercase font-semibold">Total shown</div>
+                <div id="stat-count" class="text-2xl font-bold text-indigo-600 mt-1">—</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="text-xs text-gray-500 uppercase font-semibold">Avg rating</div>
+                <div id="stat-avg" class="text-2xl font-bold text-amber-600 mt-1">—</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="text-xs text-gray-500 uppercase font-semibold">With location</div>
+                <div id="stat-loc" class="text-2xl font-bold text-emerald-600 mt-1">—</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="text-xs text-gray-500 uppercase font-semibold">Last received</div>
+                <div id="stat-last" class="text-sm font-semibold text-gray-700 mt-2">—</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Table -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-left">#</th>
+                            <th class="px-4 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">Rating</th>
+                            <th class="px-4 py-3 text-left">Feedback</th>
+                            <th class="px-4 py-3 text-left">Location</th>
+                            <th class="px-4 py-3 text-left">Page</th>
+                            <th class="px-4 py-3 text-left">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fb-tbody" class="divide-y divide-gray-100">
+                        <!-- rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="hidden text-center py-16 text-gray-500">
+                <div class="text-5xl mb-3">📭</div>
+                <div class="font-semibold text-gray-700">No feedback yet</div>
+                <div class="text-sm mt-1">Once users submit feedback, it will show up here.</div>
+            </div>
+            <div id="error-state" class="hidden text-center py-16 text-red-600">
+                <div class="text-5xl mb-3">⚠️</div>
+                <div class="font-semibold">Could not load feedback</div>
+                <div id="error-msg" class="text-sm mt-1 text-red-500"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const tbody       = document.getElementById('fb-tbody');
+        const emptyState  = document.getElementById('empty-state');
+        const errorState  = document.getElementById('error-state');
+        const errorMsg    = document.getElementById('error-msg');
+        const searchInput = document.getElementById('search');
+        const validOnly   = document.getElementById('valid-only');
+        const minRating   = document.getElementById('min-rating');
+        const refreshBtn  = document.getElementById('refresh-btn');
+        const exportBtn   = document.getElementById('export-btn');
+
+        const statCount = document.getElementById('stat-count');
+        const statAvg   = document.getElementById('stat-avg');
+        const statLoc   = document.getElementById('stat-loc');
+        const statLast  = document.getElementById('stat-last');
+
+        let allItems = [];
+
+        function escapeHTML(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            })[c]);
+        }
+
+        function stars(n) {
+            n = Math.max(0, Math.min(5, parseInt(n, 10) || 0));
+            const full = '★'.repeat(n), empty = '★'.repeat(5 - n);
+            return `<span class="star">${full}</span><span class="star-empty">${empty}</span>`;
+        }
+
+        function fmtTime(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return escapeHTML(iso);
+            return d.toLocaleString(undefined, {
+                year: 'numeric', month: 'short', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function renderRows(items) {
+            tbody.innerHTML = '';
+            errorState.classList.add('hidden');
+
+            if (!items.length) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            const frag = document.createDocumentFragment();
+            items.forEach((it, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'tbl-row align-top';
+                const r = parseInt(it.rating, 10) || 0;
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-gray-400 font-mono text-xs">${idx + 1}</td>
+                    <td class="px-4 py-3 font-semibold text-gray-800">
+                        ${escapeHTML(it.name) || '<span class="text-gray-400 font-normal">Anonymous</span>'}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="badge badge-${r}">${r}/5</span>
+                        <div class="text-base mt-1">${stars(r)}</div>
+                    </td>
+                    <td class="px-4 py-3 max-w-md text-gray-700 leading-relaxed">
+                        ${escapeHTML(it.message) || '<span class="text-gray-400 italic">No message</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-gray-600 text-xs">
+                        ${it.location
+                            ? '📍 ' + escapeHTML(it.location)
+                            : '<span class="text-gray-400">—</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-xs">
+                        ${it.page
+                            ? `<code class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHTML(it.page)}</code>`
+                            : '<span class="text-gray-400">—</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                        ${fmtTime(it.created_at)}
+                    </td>
+                `;
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
+        function updateStats(items) {
+            statCount.textContent = items.length;
+            if (items.length) {
+                const avg = items.reduce((s, x) => s + (parseInt(x.rating, 10) || 0), 0) / items.length;
+                statAvg.textContent = avg.toFixed(2) + ' ★';
+                statLoc.textContent = items.filter(x => x.location).length;
+                const newest = items[0]?.created_at;
+                statLast.textContent = fmtTime(newest);
+            } else {
+                statAvg.textContent = '—';
+                statLoc.textContent = '0';
+                statLast.textContent = '—';
+            }
+        }
+
+        function applyFilters() {
+            const q = searchInput.value.trim().toLowerCase();
+            let items = allItems;
+            if (q) {
+                items = items.filter(it =>
+                    (it.name || '').toLowerCase().includes(q) ||
+                    (it.message || '').toLowerCase().includes(q) ||
+                    (it.location || '').toLowerCase().includes(q) ||
+                    (it.page || '').toLowerCase().includes(q)
+                );
+            }
+            renderRows(items);
+            updateStats(items);
+        }
+
+        function showSkeleton() {
+            tbody.innerHTML = '';
+            emptyState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            for (let i = 0; i < 6; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="7" class="px-4 py-3"><div class="skeleton h-6 rounded"></div></td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function load() {
+            showSkeleton();
+            const params = new URLSearchParams({
+                limit: '500',
+                valid_only: validOnly.checked ? 'true' : 'false',
+                min_rating: minRating.value,
+            });
+            try {
+                const r = await fetch(`/api/feedback/all?${params.toString()}`);
+                if (!r.ok) {
+                    const t = await r.text().catch(() => '');
+                    throw new Error(`HTTP ${r.status} ${t}`.trim());
+                }
+                const data = await r.json();
+                allItems = Array.isArray(data.items) ? data.items : [];
+                applyFilters();
+            } catch (err) {
+                tbody.innerHTML = '';
+                emptyState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMsg.textContent = err.message || 'Unknown error';
+            }
+        }
+
+        function exportCSV() {
+            if (!allItems.length) return;
+            const cols = ['id','name','rating','message','location','page','created_at','latitude','longitude'];
+            const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const header = cols.join(',');
+            const body = allItems.map(it => cols.map(c => esc(it[c])).join(',')).join('\n');
+            const blob = new Blob([header + '\n' + body], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `feedback_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        validOnly.addEventListener('change', load);
+        minRating.addEventListener('change', load);
+        refreshBtn.addEventListener('click', load);
+        exportBtn.addEventListener('click', exportCSV);
+
+        load();
+    </script>
+</body>
+</html>

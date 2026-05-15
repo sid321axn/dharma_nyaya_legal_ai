@@ -2,7 +2,7 @@
  * Provides offline capability and caches the Rights Card for offline use.
  */
 
-const CACHE_VERSION = 'dharma-nyaya-v4';
+const CACHE_VERSION = 'dharma-nyaya-v12';
 const OFFLINE_PAGE = '/offline-rights';
 
 const STATIC_ASSETS = [

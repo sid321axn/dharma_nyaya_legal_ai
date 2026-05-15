@@ -32,7 +32,6 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="/voice" class="text-sm text-emerald-600 hover:text-emerald-700 transition font-semibold">🎙️ Voice</a>
                     <a href="/sos" class="text-sm text-red-500 hover:text-red-700 transition font-semibold" data-i18n="navSOS">🚨 SOS</a>
                     <a href="/quiz" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navKnowRights">Know Your Rights</a>
                     <a href="/legal-aid" class="text-sm text-gray-500 hover:text-indigo-600 transition" data-i18n="navLegalAid">Legal Aid</a>
@@ -182,5 +181,22 @@
     <script src="/assets/js/app.js"></script>
     <script src="/assets/js/pwa.js" defer></script>
     <script src="/assets/js/network.js" defer></script>
+
+    <!-- Live Voice Chat floating button -->
+    <a href="/voice" title="Switch to Live Voice Chat"
+        class="fixed right-5 bottom-24 z-50 flex flex-col items-center gap-1 group">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg flex items-center justify-center
+                    group-hover:scale-110 group-hover:shadow-emerald-300/60 group-hover:shadow-xl transition-all duration-200">
+            <!-- mic icon -->
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+            <!-- pulse ring -->
+            <span class="absolute inset-0 rounded-full bg-emerald-400 opacity-30 animate-ping pointer-events-none"></span>
+        </div>
+        <span class="text-xs font-semibold text-emerald-700 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full shadow
+                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Live Chat</span>
+    </a>
 </body>
 </html>
