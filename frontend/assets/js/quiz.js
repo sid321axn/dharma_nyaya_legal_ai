@@ -59,9 +59,9 @@ function renderTopicCards(lang) {
     } else {
         var defaultOrder = ['fundamental_rights', 'police_rights', 'women_rights', 'consumer_rights', 'property_rights', 'labour_rights'];
         topicsDiv.innerHTML = defaultOrder.map(buildTopicCard).join('');
-        // Re-apply i18n translations to newly rendered cards
-        if (typeof setLanguage === 'function') setLanguage(lang);
     }
+    // Re-apply i18n translations to newly rendered cards (works for both EN and UK)
+    if (typeof setLanguage === 'function') setLanguage(lang);
 }
 
 // ── Load questions from SQLite backend ─────────────────────────────────────
