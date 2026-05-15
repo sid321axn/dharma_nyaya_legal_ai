@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     # Default language
     DEFAULT_LANGUAGE: str = "en"
 
+    # MySQL (optional) — used to serve quiz questions across deployments.
+    # When DB_HOST is set, the quiz route reads from MySQL instead of the
+    # bundled SQLite cache. Falls back to SQLite if MySQL is unreachable.
+    DB_HOST: str = ""
+    DB_PORT: int = 3306
+    DB_USER: str = ""
+    DB_PASSWORD: str = ""
+    DB_NAME: str = ""
+
     # Google Search grounding (Chat / Spot-the-Trap / Predict)
     # Gemma 4 31B fully supports the `googleSearch` tool — when enabled, the
     # model itself runs Google Search during generation and verified source
